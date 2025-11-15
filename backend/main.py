@@ -49,8 +49,9 @@ class WordResponse(BaseModel):
     conjugations: Optional[dict]  # Werkwoordvervoegingen
     forms: Optional[dict]  # Meervoud/geslacht vormen
     # Learning enhancement fields
-    example_sentences: Optional[List[dict]] = None  # [{"spanish": "...", "dutch": "..."}]
+    example_sentences: Optional[List[dict]] = None  # [{"spanish": "...", "dutch": "...", "difficulty": "..."}]
     related_words: Optional[dict] = None  # {"synonyms": [...], "antonyms": [...], "family": [...]}
+    grammar_tips: Optional[dict] = None  # {"usage_rules": [...], "common_mistakes": [...], "tips": [...]}
     video_url: Optional[str] = None  # YouTube embed URL
     created_at: datetime
     # Spaced repetition fields
@@ -111,6 +112,7 @@ def word_to_response(word: Word) -> WordResponse:
     forms = None
     example_sentences = None
     related_words = None
+    grammar_tips = None
 
     if word.conjugations:
         try:
@@ -136,6 +138,12 @@ def word_to_response(word: Word) -> WordResponse:
         except (json.JSONDecodeError, TypeError):
             pass
 
+    if word.grammar_tips:
+        try:
+            grammar_tips = json.loads(word.grammar_tips)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
     return WordResponse(
         id=word.id,
         dutch_word=word.dutch_word,
@@ -147,6 +155,7 @@ def word_to_response(word: Word) -> WordResponse:
         forms=forms,
         example_sentences=example_sentences,
         related_words=related_words,
+        grammar_tips=grammar_tips,
         video_url=word.video_url,
         created_at=word.created_at,
         review_count=word.review_count,
@@ -378,50 +387,76 @@ Geef je antwoord in dit EXACTE JSON formaat (geen extra tekst):
 
 async def generate_learning_enhancements(spanish_word: str, dutch_word: str, category: str) -> dict:
     """
-    Generate example sentences and related words for enhanced learning.
+    Generate example sentences, related words, and grammar tips for enhanced learning.
     Called separately after main translation to enrich word data.
 
     Returns:
-        dict with keys: example_sentences, related_words
+        dict with keys: example_sentences, related_words, grammar_tips
     """
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         print("⚠️ No API key for learning enhancements, skipping...")
-        return {"example_sentences": [], "related_words": {}}
+        return {"example_sentences": [], "related_words": {}, "grammar_tips": {}}
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    prompt = f"""Generate learning enhancements for Spanish word "{spanish_word}" (Dutch: "{dutch_word}", Category: {category}).
+    prompt = f"""Generate comprehensive learning enhancements for Spanish word "{spanish_word}" (Dutch: "{dutch_word}", Category: {category}).
 
 PROVIDE:
-1. **3 Example Sentences** - Show the word in natural context:
-   - Vary difficulty (basic → intermediate)
+
+1. **6 Example Sentences** - Show the word in varied contexts with PROGRESSIVE DIFFICULTY:
+   - 2 BASIC sentences (simple present tense, everyday situations)
+   - 2 INTERMEDIATE sentences (past/future tense, more complex vocabulary)
+   - 2 ADVANCED sentences (subjunctive, idiomatic expressions, cultural context)
+   - Vary sentence TYPES: statements, questions, exclamations
    - Include both Spanish sentence AND Dutch translation
    - Keep sentences practical and conversational
+   - Each sentence should have a "difficulty" field: "basic", "intermediate", or "advanced"
 
 2. **Related Words** for memory connections:
-   - Synonyms (2-3 Spaanse woorden met gelijke betekenis)
-   - Antonyms (1-2 tegenovergestelden, if applicable)
-   - Word Family (verwante woorden zoals trabajo → trabajar, trabajador)
+   - Synonyms (2-3 Spaanse woorden met gelijke of vergelijkbare betekenis)
+   - Antonyms (1-2 tegenovergestelden, indien van toepassing)
+   - Word Family (verwante woorden zoals trabajo → trabajar, trabajador, trabajadora)
+
+3. **Grammar Tips** - Practical usage guidance:
+   - Usage Rules: 2-3 belangrijke grammaticaregels voor dit woord (bijv. geslacht, werkwoordsvervoegingen, vaste uitdrukkingen)
+   - Common Mistakes: 1-2 veelvoorkomende fouten die Nederlandse sprekers maken met dit woord
+   - Helpful Tips: 1-2 memory tricks of usage tips
 
 Return ONLY valid JSON (no markdown):
 {{
   "example_sentences": [
-    {{"spanish": "El gato come pescado.", "dutch": "De kat eet vis."}},
-    {{"spanish": "Mi gato es muy cariñoso.", "dutch": "Mijn kat is erg aanhankelijk."}},
-    {{"spanish": "¿Has visto al gato del vecino?", "dutch": "Heb je de kat van de buur gezien?"}}
+    {{"spanish": "El gato come pescado.", "dutch": "De kat eet vis.", "difficulty": "basic", "type": "statement"}},
+    {{"spanish": "¿Dónde está mi gato?", "dutch": "Waar is mijn kat?", "difficulty": "basic", "type": "question"}},
+    {{"spanish": "Ayer vi un gato negro en la calle.", "dutch": "Gisteren zag ik een zwarte kat op straat.", "difficulty": "intermediate", "type": "statement"}},
+    {{"spanish": "¿Has alimentado al gato hoy?", "dutch": "Heb je de kat vandaag gevoerd?", "difficulty": "intermediate", "type": "question"}},
+    {{"spanish": "¡Qué gato más bonito tienes!", "dutch": "Wat een mooie kat heb je!", "difficulty": "advanced", "type": "exclamation"}},
+    {{"spanish": "Si tuviera un gato, lo llamaría Whiskers.", "dutch": "Als ik een kat had, zou ik hem Whiskers noemen.", "difficulty": "advanced", "type": "statement"}}
   ],
   "related_words": {{
     "synonyms": ["minino", "felino"],
-    "antonyms": [],
+    "antonyms": ["perro (dog)"],
     "family": ["gatito (kitten)", "gatuno (feline)", "gatera (cat lover)"]
+  }},
+  "grammar_tips": {{
+    "usage_rules": [
+      "El gato is MASCULINE (el, not la)",
+      "Plural: los gatos (add -s for words ending in vowel)"
+    ],
+    "common_mistakes": [
+      "Don't confuse 'gato' (cat) with 'pato' (duck) - pronunciation matters!"
+    ],
+    "tips": [
+      "Remember: gato sounds like 'got-oh' not 'gat-oh'",
+      "Common expression: 'Hay gato encerrado' = 'There's something fishy going on'"
+    ]
   }}
 }}"""
 
     try:
         message = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=800,
+            max_tokens=1500,  # Increased for more content
             messages=[{"role": "user", "content": prompt}]
         )
 
@@ -435,12 +470,12 @@ Return ONLY valid JSON (no markdown):
             response_text = response_text.strip()
 
         result = json.loads(response_text)
-        print(f"✅ Learning enhancements generated: {len(result.get('example_sentences', []))} sentences")
+        print(f"✅ Learning enhancements generated: {len(result.get('example_sentences', []))} sentences, grammar tips included")
         return result
 
     except Exception as e:
         print(f"❌ Error generating learning enhancements: {str(e)}")
-        return {"example_sentences": [], "related_words": {}}
+        return {"example_sentences": [], "related_words": {}, "grammar_tips": {}}
 
 
 def validate_svg(svg_code: str) -> tuple[bool, str]:
@@ -919,6 +954,7 @@ async def create_word(word_data: WordCreate, db: Session = Depends(get_db)):
     forms_json = None
     example_sentences_json = None
     related_words_json = None
+    grammar_tips_json = None
 
     if "conjugations" in ai_result and ai_result["conjugations"]:
         conjugations_json = json.dumps(ai_result["conjugations"])
@@ -932,6 +968,9 @@ async def create_word(word_data: WordCreate, db: Session = Depends(get_db)):
     if enhancements.get("related_words"):
         related_words_json = json.dumps(enhancements["related_words"])
 
+    if enhancements.get("grammar_tips"):
+        grammar_tips_json = json.dumps(enhancements["grammar_tips"])
+
     db_word = Word(
         dutch_word=word_data.dutch_word,
         spanish_word=ai_result["spanish"],
@@ -941,7 +980,8 @@ async def create_word(word_data: WordCreate, db: Session = Depends(get_db)):
         conjugations=conjugations_json,
         forms=forms_json,
         example_sentences=example_sentences_json,
-        related_words=related_words_json
+        related_words=related_words_json,
+        grammar_tips=grammar_tips_json
     )
     
     db.add(db_word)
@@ -1686,6 +1726,271 @@ def check_multiple_choice_answer(answer: MultipleChoiceAnswer, db: Session = Dep
         correct_answer=answer.correct_answer,
         dutch_word=word.dutch_word,
         spanish_word=word.spanish_word,
+        message=message
+    )
+
+
+# =============================================================================
+# SENTENCE PRACTICE ENDPOINTS (Fill-in-blank & Translation)
+# =============================================================================
+
+class FillInBlankQuestion(BaseModel):
+    """Fill-in-blank sentence practice question"""
+    word_id: int
+    sentence_id: int  # Index in example_sentences array
+    sentence_with_blank: str  # Spanish sentence with ___ replacing the target word
+    dutch_translation: str
+    difficulty: str
+    correct_answer: str  # The Spanish word to fill in
+    hint: str  # Dutch word as hint
+
+class FillInBlankAnswer(BaseModel):
+    """User's answer to fill-in-blank"""
+    word_id: int
+    user_answer: str
+    correct_answer: str
+
+class FillInBlankResult(BaseModel):
+    """Result of fill-in-blank practice"""
+    correct: bool
+    user_answer: str
+    correct_answer: str
+    full_sentence: str
+    dutch_translation: str
+    similarity_score: float
+    message: str
+
+
+@app.get("/api/practice/fill-blank", response_model=FillInBlankQuestion)
+def get_fill_blank_question(db: Session = Depends(get_db)):
+    """
+    Get a fill-in-blank sentence practice question.
+    Picks a random word with example sentences, then removes the target word from a sentence.
+    """
+    import random
+    import re
+
+    # Get all words that have example sentences
+    words_with_sentences = db.query(Word).filter(Word.example_sentences.isnot(None)).all()
+
+    if not words_with_sentences:
+        raise HTTPException(status_code=404, detail="Geen woorden met voorbeeldzinnen gevonden")
+
+    # Pick random word
+    word = random.choice(words_with_sentences)
+
+    # Parse example sentences
+    try:
+        sentences = json.loads(word.example_sentences)
+        if not sentences or len(sentences) == 0:
+            raise ValueError("No sentences")
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(status_code=500, detail="Fout bij laden voorbeeldzinnen")
+
+    # Pick random sentence
+    sentence_index = random.randint(0, len(sentences) - 1)
+    sentence = sentences[sentence_index]
+
+    spanish_sentence = sentence.get("spanish", "")
+    dutch_translation = sentence.get("dutch", "")
+    difficulty = sentence.get("difficulty", "basic")
+
+    # Replace the Spanish word with a blank (___)
+    # Use regex to replace the word (case-insensitive, whole word only)
+    spanish_word_base = word.spanish_word.lower().split()[0]  # Get base word without articles
+
+    # Create pattern that matches the word with optional articles
+    pattern = r'\b(el |la |los |las |un |una |unos |unas )?' + re.escape(spanish_word_base) + r'\b'
+    sentence_with_blank = re.sub(pattern, "___", spanish_sentence, count=1, flags=re.IGNORECASE)
+
+    # If replacement didn't work, try just the word itself
+    if sentence_with_blank == spanish_sentence:
+        sentence_with_blank = spanish_sentence.replace(spanish_word_base, "___")
+
+    return FillInBlankQuestion(
+        word_id=word.id,
+        sentence_id=sentence_index,
+        sentence_with_blank=sentence_with_blank,
+        dutch_translation=dutch_translation,
+        difficulty=difficulty,
+        correct_answer=spanish_word_base,
+        hint=word.dutch_word
+    )
+
+
+@app.post("/api/practice/fill-blank/check", response_model=FillInBlankResult)
+def check_fill_blank_answer(answer: FillInBlankAnswer, db: Session = Depends(get_db)):
+    """
+    Check user's fill-in-blank answer using fuzzy matching.
+    Accepts answers with >= 80% similarity.
+    """
+    word = db.query(Word).filter(Word.id == answer.word_id).first()
+    if not word:
+        raise HTTPException(status_code=404, detail="Woord niet gevonden")
+
+    # Normalize answers
+    user_answer_clean = answer.user_answer.lower().strip()
+    correct_answer_clean = answer.correct_answer.lower().strip()
+
+    # Also accept the full Spanish word with articles
+    spanish_word_variants = [
+        correct_answer_clean,
+        word.spanish_word.lower().strip()
+    ]
+
+    # Calculate best similarity score
+    from difflib import SequenceMatcher
+    similarities = [
+        SequenceMatcher(None, user_answer_clean, variant).ratio() * 100
+        for variant in spanish_word_variants
+    ]
+    best_similarity = max(similarities)
+
+    is_correct = best_similarity >= 80
+
+    # Get the full sentence for display
+    try:
+        sentences = json.loads(word.example_sentences)
+        full_sentence = sentences[0].get("spanish", "")  # Simplified: use first sentence
+        dutch_translation = sentences[0].get("dutch", "")
+    except:
+        full_sentence = word.spanish_word
+        dutch_translation = word.dutch_word
+
+    # Feedback message
+    if best_similarity >= 95:
+        message = "🎉 Perfect! Uitstekend antwoord!"
+    elif best_similarity >= 80:
+        message = f"✅ Bijna goed! Kleine spelfout, maar goed bezig. (Correct: {answer.correct_answer})"
+    elif best_similarity >= 60:
+        message = f"⚠️ Dichtbij! Probeer nog eens. (Hint: {word.dutch_word})"
+    else:
+        message = f"❌ Niet helemaal. Het correcte antwoord is: {answer.correct_answer}"
+
+    return FillInBlankResult(
+        correct=is_correct,
+        user_answer=answer.user_answer,
+        correct_answer=answer.correct_answer,
+        full_sentence=full_sentence,
+        dutch_translation=dutch_translation,
+        similarity_score=round(best_similarity, 1),
+        message=message
+    )
+
+
+class TranslationQuestion(BaseModel):
+    """Translation practice question"""
+    word_id: int
+    sentence_id: int
+    source_sentence: str  # Sentence to translate (Dutch or Spanish)
+    source_language: str  # "dutch" or "spanish"
+    target_language: str  # "spanish" or "dutch"
+    difficulty: str
+    correct_answer: str  # Expected translation
+
+class TranslationAnswer(BaseModel):
+    """User's translation answer"""
+    word_id: int
+    user_translation: str
+    correct_translation: str
+
+class TranslationResult(BaseModel):
+    """Result of translation practice"""
+    correct: bool
+    user_translation: str
+    correct_translation: str
+    source_sentence: str
+    similarity_score: float
+    message: str
+
+
+@app.get("/api/practice/translate", response_model=TranslationQuestion)
+def get_translation_question(db: Session = Depends(get_db)):
+    """
+    Get a translation practice question.
+    Randomly picks Dutch→Spanish or Spanish→Dutch direction.
+    """
+    import random
+
+    # Get all words with example sentences
+    words_with_sentences = db.query(Word).filter(Word.example_sentences.isnot(None)).all()
+
+    if not words_with_sentences:
+        raise HTTPException(status_code=404, detail="Geen woorden met voorbeeldzinnen gevonden")
+
+    # Pick random word and sentence
+    word = random.choice(words_with_sentences)
+
+    try:
+        sentences = json.loads(word.example_sentences)
+        if not sentences:
+            raise ValueError("No sentences")
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(status_code=500, detail="Fout bij laden voorbeeldzinnen")
+
+    sentence = random.choice(sentences)
+
+    # Randomly choose translation direction
+    direction = random.choice(["dutch_to_spanish", "spanish_to_dutch"])
+
+    if direction == "dutch_to_spanish":
+        source_sentence = sentence.get("dutch", "")
+        correct_answer = sentence.get("spanish", "")
+        source_language = "dutch"
+        target_language = "spanish"
+    else:
+        source_sentence = sentence.get("spanish", "")
+        correct_answer = sentence.get("dutch", "")
+        source_language = "spanish"
+        target_language = "dutch"
+
+    return TranslationQuestion(
+        word_id=word.id,
+        sentence_id=sentences.index(sentence),
+        source_sentence=source_sentence,
+        source_language=source_language,
+        target_language=target_language,
+        difficulty=sentence.get("difficulty", "basic"),
+        correct_answer=correct_answer
+    )
+
+
+@app.post("/api/practice/translate/check", response_model=TranslationResult)
+def check_translation_answer(answer: TranslationAnswer, db: Session = Depends(get_db)):
+    """
+    Check user's translation using fuzzy matching.
+    Accepts translations with >= 70% similarity (more lenient than word practice).
+    """
+    word = db.query(Word).filter(Word.id == answer.word_id).first()
+    if not word:
+        raise HTTPException(status_code=404, detail="Woord niet gevonden")
+
+    # Normalize
+    user_translation_clean = answer.user_translation.lower().strip()
+    correct_translation_clean = answer.correct_translation.lower().strip()
+
+    # Calculate similarity
+    from difflib import SequenceMatcher
+    similarity = SequenceMatcher(None, user_translation_clean, correct_translation_clean).ratio() * 100
+
+    is_correct = similarity >= 70  # More lenient for full sentences
+
+    # Feedback
+    if similarity >= 90:
+        message = "🎉 Uitstekende vertaling!"
+    elif similarity >= 70:
+        message = "✅ Goede vertaling! Kleine verschillen zijn acceptabel."
+    elif similarity >= 50:
+        message = f"⚠️ Bijna! De juiste vertaling is: {answer.correct_translation}"
+    else:
+        message = f"❌ Probeer opnieuw. Correcte vertaling: {answer.correct_translation}"
+
+    return TranslationResult(
+        correct=is_correct,
+        user_translation=answer.user_translation,
+        correct_translation=answer.correct_translation,
+        source_sentence=user_translation_clean,  # Will be overridden by frontend
+        similarity_score=round(similarity, 1),
         message=message
     )
 

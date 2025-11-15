@@ -29,8 +29,9 @@ class Word(Base):
     forms = Column(Text)  # JSON string voor meervoud/geslacht vormen
 
     # Learning enhancement fields
-    example_sentences = Column(Text)  # JSON: [{"spanish": "...", "dutch": "..."}]
+    example_sentences = Column(Text)  # JSON: [{"spanish": "...", "dutch": "...", "difficulty": "..."}]
     related_words = Column(Text)  # JSON: {"synonyms": [...], "antonyms": [...], "family": [...]}
+    grammar_tips = Column(Text)  # JSON: {"usage_rules": [...], "common_mistakes": [...], "tips": [...]}
     video_url = Column(String)  # Optional YouTube embed URL
 
     created_at = Column(DateTime, default=datetime.utcnow)

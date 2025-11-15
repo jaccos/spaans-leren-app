@@ -114,7 +114,19 @@
             const [quizSelectedOption, setQuizSelectedOption] = useState(null); // Selected option index
             const [quizFeedback, setQuizFeedback] = useState(null); // Feedback after check
             const [quizLoading, setQuizLoading] = useState(false); // Loading new question
-            const [practiceMode, setPracticeMode] = useState(null); // 'listening' or 'quiz'
+            const [practiceMode, setPracticeMode] = useState(null); // 'listening', 'quiz', 'fillblank', or 'translate'
+
+            // Fill-in-blank practice state
+            const [fillBlankQuestion, setFillBlankQuestion] = useState(null);
+            const [fillBlankAnswer, setFillBlankAnswer] = useState('');
+            const [fillBlankFeedback, setFillBlankFeedback] = useState(null);
+            const [fillBlankLoading, setFillBlankLoading] = useState(false);
+
+            // Translation practice state
+            const [translateQuestion, setTranslateQuestion] = useState(null);
+            const [translateAnswer, setTranslateAnswer] = useState('');
+            const [translateFeedback, setTranslateFeedback] = useState(null);
+            const [translateLoading, setTranslateLoading] = useState(false);
 
             // Ref for input field auto-focus
             const dutchWordInputRef = useRef(null);
@@ -397,6 +409,98 @@
                 } catch (error) {
                     console.error('Error checking quiz answer:', error);
                     setNotification({ type: 'error', message: '❌ Kon antwoord niet checken' });
+                    setTimeout(() => setNotification(null), 3000);
+                }
+            };
+
+            // Fill-in-blank practice functions
+            const loadFillBlankQuestion = async () => {
+                setFillBlankLoading(true);
+                setFillBlankFeedback(null);
+                setFillBlankAnswer('');
+
+                try {
+                    const response = await fetch(`${API_BASE}/practice/fill-blank`);
+                    const data = await response.json();
+                    setFillBlankQuestion(data);
+                } catch (error) {
+                    console.error('Error loading fill-blank question:', error);
+                    setNotification({ type: 'error', message: '❌ Kon geen vraag laden' });
+                    setTimeout(() => setNotification(null), 3000);
+                } finally {
+                    setFillBlankLoading(false);
+                }
+            };
+
+            const checkFillBlankAnswer = async () => {
+                if (!fillBlankAnswer.trim()) {
+                    setNotification({ type: 'error', message: 'Vul eerst een antwoord in! ✏️' });
+                    setTimeout(() => setNotification(null), 3000);
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/practice/fill-blank/check`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            word_id: fillBlankQuestion.word_id,
+                            user_answer: fillBlankAnswer,
+                            correct_answer: fillBlankQuestion.correct_answer
+                        })
+                    });
+
+                    const feedback = await response.json();
+                    setFillBlankFeedback(feedback);
+                } catch (error) {
+                    console.error('Error checking fill-blank answer:', error);
+                    setNotification({ type: 'error', message: '❌ Kon antwoord niet checken' });
+                    setTimeout(() => setNotification(null), 3000);
+                }
+            };
+
+            // Translation practice functions
+            const loadTranslateQuestion = async () => {
+                setTranslateLoading(true);
+                setTranslateFeedback(null);
+                setTranslateAnswer('');
+
+                try {
+                    const response = await fetch(`${API_BASE}/practice/translate`);
+                    const data = await response.json();
+                    setTranslateQuestion(data);
+                } catch (error) {
+                    console.error('Error loading translation question:', error);
+                    setNotification({ type: 'error', message: '❌ Kon geen vertaalvraag laden' });
+                    setTimeout(() => setNotification(null), 3000);
+                } finally {
+                    setTranslateLoading(false);
+                }
+            };
+
+            const checkTranslateAnswer = async () => {
+                if (!translateAnswer.trim()) {
+                    setNotification({ type: 'error', message: 'Vul eerst een vertaling in! 🌐' });
+                    setTimeout(() => setNotification(null), 3000);
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/practice/translate/check`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            word_id: translateQuestion.word_id,
+                            user_translation: translateAnswer,
+                            correct_translation: translateQuestion.correct_answer
+                        })
+                    });
+
+                    const feedback = await response.json();
+                    setTranslateFeedback(feedback);
+                } catch (error) {
+                    console.error('Error checking translation:', error);
+                    setNotification({ type: 'error', message: '❌ Kon vertaling niet checken' });
                     setTimeout(() => setNotification(null), 3000);
                 }
             };
@@ -1355,6 +1459,32 @@
                                                     <h3 className="text-2xl font-bold text-green-600 mb-2">Multiple Choice Quiz</h3>
                                                     <p className="text-gray-700">Kies het juiste antwoord uit 4 opties</p>
                                                 </button>
+
+                                                {/* Fill-in-Blank Mode Button */}
+                                                <button
+                                                    onClick={() => {
+                                                        setPracticeMode('fillblank');
+                                                        loadFillBlankQuestion();
+                                                    }}
+                                                    className="bg-gradient-to-br from-yellow-100 to-orange-100 hover:from-yellow-200 hover:to-orange-200 rounded-2xl p-8 text-center transition-all transform hover:scale-105 border-2 border-transparent hover:border-yellow-500"
+                                                >
+                                                    <div className="text-6xl mb-4">✏️</div>
+                                                    <h3 className="text-2xl font-bold text-orange-600 mb-2">Zin Aanvullen</h3>
+                                                    <p className="text-gray-700">Vul het ontbrekende woord in de zin in</p>
+                                                </button>
+
+                                                {/* Translation Mode Button */}
+                                                <button
+                                                    onClick={() => {
+                                                        setPracticeMode('translate');
+                                                        loadTranslateQuestion();
+                                                    }}
+                                                    className="bg-gradient-to-br from-pink-100 to-rose-100 hover:from-pink-200 hover:to-rose-200 rounded-2xl p-8 text-center transition-all transform hover:scale-105 border-2 border-transparent hover:border-pink-500"
+                                                >
+                                                    <div className="text-6xl mb-4">🌐</div>
+                                                    <h3 className="text-2xl font-bold text-pink-600 mb-2">Zin Vertalen</h3>
+                                                    <p className="text-gray-700">Vertaal hele zinnen van Nederlands naar Spaans</p>
+                                                </button>
                                             </div>
                                         </div>
                                     ) : practiceMode === 'listening' ? (
@@ -1622,6 +1752,225 @@
                                                                 className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-lg rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50"
                                                             >
                                                                 {quizLoading ? '⏳ Laden...' : '➡️ Volgende Vraag'}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : practiceMode === 'fillblank' ? (
+                                        /* Fill-in-Blank Practice Mode */
+                                        <div>
+                                            <button
+                                                onClick={() => {
+                                                    setPracticeMode(null);
+                                                    setFillBlankQuestion(null);
+                                                    setFillBlankFeedback(null);
+                                                }}
+                                                className="mb-4 px-4 py-2 text-gray-600 hover:text-gray-800 font-semibold"
+                                            >
+                                                ← Terug naar keuzemenu
+                                            </button>
+
+                                            <div className="text-center mb-8">
+                                                <h2 className="text-4xl font-black gradient-text mb-3">✏️ Zin Aanvullen</h2>
+                                                <p className="text-gray-600 text-lg">Vul het ontbrekende woord in</p>
+                                            </div>
+
+                                            {!fillBlankQuestion ? (
+                                                <div className="text-center py-12">
+                                                    <button
+                                                        onClick={loadFillBlankQuestion}
+                                                        disabled={fillBlankLoading}
+                                                        className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-xl rounded-2xl hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50"
+                                                    >
+                                                        {fillBlankLoading ? '⏳ Laden...' : '✏️ Start Oefening'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-6">
+                                                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-8">
+                                                        <div className="text-center mb-4">
+                                                            <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-4 ${
+                                                                fillBlankQuestion.difficulty === 'basic' ? 'bg-green-100 text-green-800' :
+                                                                fillBlankQuestion.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                                                                'bg-red-100 text-red-800'
+                                                            }`}>
+                                                                {fillBlankQuestion.difficulty === 'basic' ? 'Basis' :
+                                                                 fillBlankQuestion.difficulty === 'intermediate' ? 'Gemiddeld' : 'Gevorderd'}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-3xl font-bold text-gray-800 mb-4 text-center">
+                                                            {fillBlankQuestion.sentence_with_blank}
+                                                        </p>
+                                                        <p className="text-lg text-gray-600 text-center italic">
+                                                            {fillBlankQuestion.dutch_translation}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500 text-center mt-4">
+                                                            💡 Hint: {fillBlankQuestion.hint}
+                                                        </p>
+                                                    </div>
+
+                                                    {!fillBlankFeedback ? (
+                                                        <>
+                                                            <input
+                                                                type="text"
+                                                                value={fillBlankAnswer}
+                                                                onChange={(e) => setFillBlankAnswer(e.target.value)}
+                                                                onKeyPress={(e) => e.key === 'Enter' && checkFillBlankAnswer()}
+                                                                placeholder="Vul het ontbrekende woord in..."
+                                                                className="w-full px-6 py-4 text-xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500"
+                                                                autoFocus
+                                                            />
+                                                            <button
+                                                                onClick={checkFillBlankAnswer}
+                                                                disabled={!fillBlankAnswer.trim()}
+                                                                className="w-full px-6 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50"
+                                                            >
+                                                                ✓ Check Antwoord
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <div>
+                                                            <div className={`p-6 rounded-2xl ${
+                                                                fillBlankFeedback.correct
+                                                                    ? 'bg-green-50 border-2 border-green-500'
+                                                                    : 'bg-red-50 border-2 border-red-500'
+                                                            }`}>
+                                                                <div className="text-center mb-4">
+                                                                    <div className="text-5xl mb-2">
+                                                                        {fillBlankFeedback.correct ? '🎉' : '❌'}
+                                                                    </div>
+                                                                    <p className="text-2xl font-bold">{fillBlankFeedback.message}</p>
+                                                                    <p className="text-lg mt-2">
+                                                                        Jouw antwoord: <span className="font-semibold">{fillBlankFeedback.user_answer}</span>
+                                                                    </p>
+                                                                    <p className="text-lg">
+                                                                        Correct: <span className="font-semibold">{fillBlankFeedback.correct_answer}</span>
+                                                                    </p>
+                                                                    <p className="text-sm text-gray-600 mt-2">
+                                                                        Overeenkomst: {fillBlankFeedback.similarity_score}%
+                                                                    </p>
+                                                                </div>
+                                                                <div className="mt-4 p-4 bg-white rounded-lg">
+                                                                    <p className="text-lg font-semibold">Volledige zin:</p>
+                                                                    <p className="text-gray-800">{fillBlankFeedback.full_sentence}</p>
+                                                                    <p className="text-gray-600 italic text-sm mt-2">{fillBlankFeedback.dutch_translation}</p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={loadFillBlankQuestion}
+                                                                disabled={fillBlankLoading}
+                                                                className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50"
+                                                            >
+                                                                {fillBlankLoading ? '⏳ Laden...' : '➡️ Volgende Vraag'}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : practiceMode === 'translate' ? (
+                                        /* Translation Practice Mode */
+                                        <div>
+                                            <button
+                                                onClick={() => {
+                                                    setPracticeMode(null);
+                                                    setTranslateQuestion(null);
+                                                    setTranslateFeedback(null);
+                                                }}
+                                                className="mb-4 px-4 py-2 text-gray-600 hover:text-gray-800 font-semibold"
+                                            >
+                                                ← Terug naar keuzemenu
+                                            </button>
+
+                                            <div className="text-center mb-8">
+                                                <h2 className="text-4xl font-black gradient-text mb-3">🌐 Zin Vertalen</h2>
+                                                <p className="text-gray-600 text-lg">Vertaal de hele zin</p>
+                                            </div>
+
+                                            {!translateQuestion ? (
+                                                <div className="text-center py-12">
+                                                    <button
+                                                        onClick={loadTranslateQuestion}
+                                                        disabled={translateLoading}
+                                                        className="px-8 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xl rounded-2xl hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50"
+                                                    >
+                                                        {translateLoading ? '⏳ Laden...' : '🌐 Start Vertaling'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-6">
+                                                    <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-8">
+                                                        <div className="text-center mb-4">
+                                                            <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-4 ${
+                                                                translateQuestion.difficulty === 'basic' ? 'bg-green-100 text-green-800' :
+                                                                translateQuestion.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                                                                'bg-red-100 text-red-800'
+                                                            }`}>
+                                                                {translateQuestion.difficulty === 'basic' ? 'Basis' :
+                                                                 translateQuestion.difficulty === 'intermediate' ? 'Gemiddeld' : 'Gevorderd'}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600 mb-2">
+                                                            Vertaal van {translateQuestion.source_language === 'dutch' ? 'Nederlands' : 'Spaans'} naar {translateQuestion.target_language === 'dutch' ? 'Nederlands' : 'Spaans'}:
+                                                        </p>
+                                                        <p className="text-3xl font-bold text-gray-800 text-center">
+                                                            {translateQuestion.source_sentence}
+                                                        </p>
+                                                    </div>
+
+                                                    {!translateFeedback ? (
+                                                        <>
+                                                            <textarea
+                                                                value={translateAnswer}
+                                                                onChange={(e) => setTranslateAnswer(e.target.value)}
+                                                                placeholder="Schrijf jouw vertaling hier..."
+                                                                rows="3"
+                                                                className="w-full px-6 py-4 text-xl border-2 border-gray-300 rounded-xl focus:outline-none focus:border-pink-500"
+                                                                autoFocus
+                                                            />
+                                                            <button
+                                                                onClick={checkTranslateAnswer}
+                                                                disabled={!translateAnswer.trim()}
+                                                                className="w-full px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-lg rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50"
+                                                            >
+                                                                ✓ Check Vertaling
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <div>
+                                                            <div className={`p-6 rounded-2xl ${
+                                                                translateFeedback.correct
+                                                                    ? 'bg-green-50 border-2 border-green-500'
+                                                                    : 'bg-red-50 border-2 border-red-500'
+                                                            }`}>
+                                                                <div className="text-center mb-4">
+                                                                    <div className="text-5xl mb-2">
+                                                                        {translateFeedback.correct ? '🎉' : '❌'}
+                                                                    </div>
+                                                                    <p className="text-2xl font-bold mb-4">{translateFeedback.message}</p>
+                                                                </div>
+                                                                <div className="space-y-3">
+                                                                    <div className="p-4 bg-white rounded-lg">
+                                                                        <p className="text-sm text-gray-600 mb-1">Jouw vertaling:</p>
+                                                                        <p className="text-lg font-semibold">{translateFeedback.user_translation}</p>
+                                                                    </div>
+                                                                    <div className="p-4 bg-green-50 rounded-lg">
+                                                                        <p className="text-sm text-gray-600 mb-1">Correcte vertaling:</p>
+                                                                        <p className="text-lg font-semibold text-green-700">{translateFeedback.correct_translation}</p>
+                                                                    </div>
+                                                                    <p className="text-sm text-gray-600 text-center">
+                                                                        Overeenkomst: {translateFeedback.similarity_score}%
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={loadTranslateQuestion}
+                                                                disabled={translateLoading}
+                                                                className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-lg rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50"
+                                                            >
+                                                                {translateLoading ? '⏳ Laden...' : '➡️ Volgende Vraag'}
                                                             </button>
                                                         </div>
                                                     )}
@@ -1915,6 +2264,66 @@
                                         )}
                                     </div>
 
+                                    {/* Grammar Tips Section */}
+                                    {selectedWord.grammar_tips && (
+                                        <div className="mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl shadow-xl p-8 max-w-3xl mx-auto">
+                                            <h3 className="text-2xl font-bold text-orange-600 mb-6 flex items-center gap-2">
+                                                💡 Grammatica Tips
+                                            </h3>
+
+                                            {/* Usage Rules */}
+                                            {selectedWord.grammar_tips.usage_rules && selectedWord.grammar_tips.usage_rules.length > 0 && (
+                                                <div className="mb-6">
+                                                    <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                                        📋 Gebruiksregels
+                                                    </h4>
+                                                    <ul className="space-y-2">
+                                                        {selectedWord.grammar_tips.usage_rules.map((rule, index) => (
+                                                            <li key={index} className="flex items-start gap-3 bg-white rounded-lg p-3">
+                                                                <span className="text-green-500 flex-shrink-0">✓</span>
+                                                                <span className="text-gray-700">{rule}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {/* Common Mistakes */}
+                                            {selectedWord.grammar_tips.common_mistakes && selectedWord.grammar_tips.common_mistakes.length > 0 && (
+                                                <div className="mb-6">
+                                                    <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                                        ⚠️ Veelgemaakte Fouten
+                                                    </h4>
+                                                    <ul className="space-y-2">
+                                                        {selectedWord.grammar_tips.common_mistakes.map((mistake, index) => (
+                                                            <li key={index} className="flex items-start gap-3 bg-white rounded-lg p-3">
+                                                                <span className="text-red-500 flex-shrink-0">⚡</span>
+                                                                <span className="text-gray-700">{mistake}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {/* Helpful Tips */}
+                                            {selectedWord.grammar_tips.tips && selectedWord.grammar_tips.tips.length > 0 && (
+                                                <div>
+                                                    <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                                        🎯 Handige Tips
+                                                    </h4>
+                                                    <ul className="space-y-2">
+                                                        {selectedWord.grammar_tips.tips.map((tip, index) => (
+                                                            <li key={index} className="flex items-start gap-3 bg-white rounded-lg p-3">
+                                                                <span className="text-blue-500 flex-shrink-0">💡</span>
+                                                                <span className="text-gray-700">{tip}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* Voorbeeldzinnen */}
                                     {selectedWord.example_sentences && selectedWord.example_sentences.length > 0 && (
                                         <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-3xl shadow-xl p-8 max-w-3xl mx-auto">
@@ -1922,17 +2331,36 @@
                                                 📚 Voorbeeldzinnen
                                             </h3>
                                             <div className="space-y-4">
-                                                {selectedWord.example_sentences.map((sentence, index) => (
-                                                    <div key={index} className="bg-white rounded-xl p-5 shadow-md">
-                                                        <div className="flex items-start gap-3 mb-2">
-                                                            <span className="text-2xl flex-shrink-0">🇪🇸</span>
-                                                            <p className="text-lg font-semibold text-gray-800">{sentence.spanish}</p>
+                                                {selectedWord.example_sentences.map((sentence, index) => {
+                                                    const difficultyColors = {
+                                                        basic: 'bg-green-100 text-green-800',
+                                                        intermediate: 'bg-yellow-100 text-yellow-800',
+                                                        advanced: 'bg-red-100 text-red-800'
+                                                    };
+                                                    const difficultyLabels = {
+                                                        basic: 'Basis',
+                                                        intermediate: 'Gemiddeld',
+                                                        advanced: 'Gevorderd'
+                                                    };
+                                                    const difficulty = sentence.difficulty || 'basic';
+
+                                                    return (
+                                                        <div key={index} className="bg-white rounded-xl p-5 shadow-md">
+                                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                                <div className="flex items-start gap-3 flex-1">
+                                                                    <span className="text-2xl flex-shrink-0">🇪🇸</span>
+                                                                    <p className="text-lg font-semibold text-gray-800">{sentence.spanish}</p>
+                                                                </div>
+                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${difficultyColors[difficulty]}`}>
+                                                                    {difficultyLabels[difficulty]}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-start gap-3 ml-8">
+                                                                <span className="text-sm text-gray-600 italic">{sentence.dutch}</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-start gap-3 ml-8">
-                                                            <span className="text-sm text-gray-600 italic">{sentence.dutch}</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}

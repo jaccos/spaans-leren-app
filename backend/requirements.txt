@@ -7,3 +7,4 @@ python-dotenv==1.0.0
 aiofiles==23.2.1
 httpx>=0.25.0
 gTTS>=2.5.0
+slowapi>=0.1.9

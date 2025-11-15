@@ -38,6 +38,15 @@ services:
       ollama:
         condition: service_healthy
     restart: unless-stopped
+    # Resource limits for security and stability
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   # Nginx reverse proxy - enige publieke entry point
   nginx:
@@ -55,6 +64,15 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    # Resource limits for nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
 
 volumes:
   # Named volume for SQLite database persistence

@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional
+import re
 import anthropic
 import os
 from datetime import datetime, timedelta, date
@@ -12,22 +13,63 @@ import json
 from dotenv import load_dotenv
 from gtts import gTTS
 import io
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import logging
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging with sensitive data filter
+class SensitiveDataFilter(logging.Filter):
+    """Filter to redact sensitive information from logs"""
+    def filter(self, record):
+        if isinstance(record.msg, str):
+            # Redact API keys
+            record.msg = re.sub(
+                r'sk-ant-[a-zA-Z0-9\-]+',
+                'sk-ant-***REDACTED***',
+                record.msg
+            )
+            # Redact other potential secrets (Bearer tokens, etc.)
+            record.msg = re.sub(
+                r'Bearer\s+[a-zA-Z0-9\-\._~\+\/]+',
+                'Bearer ***REDACTED***',
+                record.msg
+            )
+        return True
+
+# Apply filter to root logger
+logging.basicConfig(level=logging.INFO)
+for handler in logging.root.handlers:
+    handler.addFilter(SensitiveDataFilter())
 
 from database import get_db, Word, ReviewHistory, StudySession, init_db
 from ai_router import ai_router
 
 app = FastAPI(title="Spaans Leren API")
 
-# CORS voor frontend
+# Rate limiting setup
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# CORS - Whitelist only trusted origins
+# For production, replace with your actual domain
+ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://localhost:80",
+    "https://spaans.local",
+    "https://spaans.orb.local",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE", "PUT"],  # Explicit methods only
+    allow_headers=["Content-Type", "Authorization"],  # Explicit headers only
 )
 
 # Initialize database
@@ -35,9 +77,32 @@ app.add_middleware(
 def startup_event():
     init_db()
 
-# Pydantic models
+# Pydantic models with validation
 class WordCreate(BaseModel):
-    dutch_word: str
+    dutch_word: str = Field(..., min_length=1, max_length=100, description="Dutch word to translate")
+
+    @validator('dutch_word')
+    def validate_dutch_word(cls, v):
+        """Validate and sanitize Dutch word input"""
+        # Strip whitespace
+        v = v.strip()
+
+        # Check length after stripping
+        if len(v) < 1:
+            raise ValueError('Word cannot be empty')
+        if len(v) > 100:
+            raise ValueError('Word too long (max 100 characters)')
+
+        # Allow letters (including accented), spaces, hyphens, apostrophes
+        # This regex supports Dutch, Spanish, and international characters
+        if not re.match(r'^[a-zA-ZÀ-ÿ\s\-\']+$', v):
+            raise ValueError('Word contains invalid characters (only letters, spaces, hyphens, and apostrophes allowed)')
+
+        # Prevent excessive whitespace
+        if '  ' in v:
+            v = re.sub(r'\s+', ' ', v)
+
+        return v
 
 class WordResponse(BaseModel):
     id: int
@@ -70,8 +135,15 @@ class WordResponse(BaseModel):
 
 
 class ReviewSubmit(BaseModel):
-    word_id: int
-    quality: int  # 0-5: 0=Again, 3=Hard, 4=Good, 5=Easy
+    word_id: int = Field(..., gt=0, description="Word ID must be positive")
+    quality: int = Field(..., ge=0, le=5, description="Quality rating 0-5")
+
+    @validator('quality')
+    def validate_quality(cls, v):
+        """Ensure quality is one of the allowed values"""
+        if v not in [0, 3, 4, 5]:
+            raise ValueError('Quality must be 0, 3, 4, or 5')
+        return v
 
 
 class ReviewHistoryResponse(BaseModel):
@@ -445,13 +517,43 @@ Return ONLY valid JSON (no markdown):
 
 def validate_svg(svg_code: str) -> tuple[bool, str]:
     """
-    Validate SVG code for basic correctness.
+    Strict SVG validation for security.
+    Protects against XSS, XXE, and malicious content injection.
     Returns (is_valid, error_message)
     """
+    import re
+    from xml.etree import ElementTree
+
     if not svg_code or len(svg_code.strip()) == 0:
         return False, "SVG is empty"
 
     svg_lower = svg_code.lower()
+
+    # SECURITY CHECK 1: Block script tags (XSS protection)
+    if re.search(r'<script', svg_code, re.IGNORECASE):
+        return False, "Scripts not allowed in SVG (security risk)"
+
+    # SECURITY CHECK 2: Block external resources (data exfiltration prevention)
+    if re.search(r'xlink:href\s*=\s*["\']https?://', svg_code, re.IGNORECASE):
+        return False, "External resources not allowed (security risk)"
+
+    # SECURITY CHECK 3: Block DOCTYPE and entities (XXE attack prevention)
+    if '<!DOCTYPE' in svg_code or '<!ENTITY' in svg_code:
+        return False, "DOCTYPE/entities not allowed (XXE protection)"
+
+    # SECURITY CHECK 4: Block event handlers (onclick, onload, etc.)
+    event_handlers = ['onclick', 'onload', 'onmouseover', 'onerror', 'onmouseenter']
+    for handler in event_handlers:
+        if handler in svg_lower:
+            return False, f"Event handlers not allowed: {handler} (XSS protection)"
+
+    # SECURITY CHECK 5: Block JavaScript URLs
+    if 'javascript:' in svg_lower:
+        return False, "JavaScript URLs not allowed (XSS protection)"
+
+    # SECURITY CHECK 6: Block data URLs with scripts
+    if re.search(r'data:[^,]*script', svg_code, re.IGNORECASE):
+        return False, "Script data URLs not allowed (XSS protection)"
 
     # Check for required tags
     if "<svg" not in svg_lower:
@@ -463,13 +565,38 @@ def validate_svg(svg_code: str) -> tuple[bool, str]:
     if 'width=' not in svg_lower or 'height=' not in svg_lower:
         return False, "Missing width or height attributes"
 
-    # Check for common issues
+    # Check for tag balance
     if svg_code.count("<svg") != svg_code.count("</svg>"):
         return False, "Mismatched svg tags"
 
-    # Check if it looks like an error message instead of SVG
+    # Check if it looks like an error message
     if "error" in svg_lower[:100] or "sorry" in svg_lower[:100]:
         return False, "SVG appears to be an error message"
+
+    # SECURITY CHECK 7: Validate as well-formed XML
+    try:
+        ElementTree.fromstring(svg_code)
+    except ElementTree.ParseError as e:
+        return False, f"Invalid XML structure: {str(e)}"
+
+    # SECURITY CHECK 8: Whitelist allowed SVG tags only
+    allowed_tags = {
+        'svg', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
+        'path', 'text', 'g', 'defs', 'linearGradient', 'radialGradient',
+        'stop', 'filter', 'feGaussianBlur', 'feOffset', 'feComponentTransfer',
+        'feFuncA', 'feMerge', 'feMergeNode', 'image', 'use', 'clipPath',
+        'mask', 'pattern', 'marker', 'symbol', 'foreignObject'
+    }
+
+    try:
+        tree = ElementTree.fromstring(svg_code)
+        for elem in tree.iter():
+            # Remove namespace prefix if present
+            tag = elem.tag.split('}')[-1] if '}' in elem.tag else elem.tag
+            if tag not in allowed_tags:
+                return False, f"Disallowed SVG tag: <{tag}> (security restriction)"
+    except Exception as e:
+        return False, f"Error parsing SVG tags: {str(e)}"
 
     return True, "Valid"
 
@@ -865,7 +992,8 @@ def generate_svg_visualization(description: str, spanish_word: str, dutch_word: 
 
 
 @app.post("/api/words/", response_model=WordResponse)
-async def create_word(word_data: WordCreate, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")  # Max 10 new words per minute (expensive AI operation)
+async def create_word(request: Request, word_data: WordCreate, db: Session = Depends(get_db)):
     # Check of het woord al bestaat (case-insensitive)
     existing_word = db.query(Word).filter(
         Word.dutch_word.ilike(word_data.dutch_word)
@@ -962,14 +1090,21 @@ def get_all_words(
     query = db.query(Word)
 
     if category:
+        # Sanitize category to prevent injection
+        category = category.strip()[:50]
         query = query.filter(Word.category == category)
 
     if search:
-        search_term = f"%{search}%"
-        query = query.filter(
-            (Word.dutch_word.like(search_term)) |
-            (Word.spanish_word.like(search_term))
-        )
+        # SECURITY: Sanitize search input to prevent SQL injection and DoS
+        # Remove special SQL LIKE characters and limit length
+        search = search.strip()[:100]  # Limit length
+        search = re.sub(r'[%_\\]', '', search)  # Remove wildcard characters
+        if search:  # Only search if there's something left after sanitization
+            search_term = f"%{search}%"
+            query = query.filter(
+                (Word.dutch_word.like(search_term)) |
+                (Word.spanish_word.like(search_term))
+            )
 
     words = query.offset(skip).limit(limit).all()
     return [word_to_response(word) for word in words]
@@ -1051,7 +1186,8 @@ def get_word_audio(word_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/words/{word_id}/regenerate", response_model=WordResponse)
-async def regenerate_word(word_id: int, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")  # Max 5 regenerations per minute
+async def regenerate_word(request: Request, word_id: int, db: Session = Depends(get_db)):
     """
     Regenerate visualization for a single word.
     This will create a NEW mnemonic and visualization using the improved prompts.
@@ -1124,7 +1260,8 @@ class RegenerateAllResponse(BaseModel):
 
 
 @app.post("/api/words/regenerate-all", response_model=RegenerateAllResponse)
-async def regenerate_all_words(db: Session = Depends(get_db)):
+@limiter.limit("1/hour")  # Max 1 batch regeneration per hour (very expensive!)
+async def regenerate_all_words(request: Request, db: Session = Depends(get_db)):
     """
     Regenerate visualizations for ALL words in the database.
     This will update all words with new mnemonics and visualizations.

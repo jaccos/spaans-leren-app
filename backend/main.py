@@ -35,6 +35,22 @@ app.add_middleware(
 def startup_event():
     init_db()
 
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    """
+    Health check endpoint for Docker and monitoring.
+
+    Returns:
+        dict: Status and basic system info
+    """
+    return {
+        "status": "healthy",
+        "service": "spaans-leren-backend",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 # Pydantic models
 class WordCreate(BaseModel):
     dutch_word: str
@@ -105,37 +121,26 @@ class HeatmapEntry(BaseModel):
     reviews: int
 
 
+def _safe_json_parse(json_str: Optional[str]) -> Optional[dict]:
+    """
+    Safely parse JSON string, returning None on error.
+
+    This helper reduces code duplication in word_to_response.
+    """
+    if not json_str:
+        return None
+    try:
+        return json.loads(json_str)
+    except (json.JSONDecodeError, TypeError):
+        return None
+
+
 def word_to_response(word: Word) -> WordResponse:
-    """Convert Word database model to WordResponse with parsed JSON fields"""
-    conjugations = None
-    forms = None
-    example_sentences = None
-    related_words = None
+    """
+    Convert Word database model to WordResponse with parsed JSON fields.
 
-    if word.conjugations:
-        try:
-            conjugations = json.loads(word.conjugations)
-        except (json.JSONDecodeError, TypeError):
-            pass
-
-    if word.forms:
-        try:
-            forms = json.loads(word.forms)
-        except (json.JSONDecodeError, TypeError):
-            pass
-
-    if word.example_sentences:
-        try:
-            example_sentences = json.loads(word.example_sentences)
-        except (json.JSONDecodeError, TypeError):
-            pass
-
-    if word.related_words:
-        try:
-            related_words = json.loads(word.related_words)
-        except (json.JSONDecodeError, TypeError):
-            pass
-
+    Optimized to reduce redundant try/except blocks and improve readability.
+    """
     return WordResponse(
         id=word.id,
         dutch_word=word.dutch_word,
@@ -143,10 +148,10 @@ def word_to_response(word: Word) -> WordResponse:
         category=word.category,
         mnemonic_text=word.mnemonic_text,
         mnemonic_image=word.mnemonic_image,
-        conjugations=conjugations,
-        forms=forms,
-        example_sentences=example_sentences,
-        related_words=related_words,
+        conjugations=_safe_json_parse(word.conjugations),
+        forms=_safe_json_parse(word.forms),
+        example_sentences=_safe_json_parse(word.example_sentences),
+        related_words=_safe_json_parse(word.related_words),
         video_url=word.video_url,
         created_at=word.created_at,
         review_count=word.review_count,
@@ -251,6 +256,64 @@ def calculate_sm2_interval(word: Word, quality: int) -> tuple[float, int, int, d
     next_review = datetime.utcnow() + timedelta(days=new_interval)
 
     return new_ef, new_interval, new_repetitions, next_review
+
+
+def update_word_review_stats(word: Word, quality: int, db: Session) -> Word:
+    """
+    Shared function to update word statistics after review.
+
+    This consolidates the SM-2 logic used across multiple endpoints
+    (submit_review, check_multiple_choice_answer).
+
+    Args:
+        word: Word to update
+        quality: Review quality 0-5
+        db: Database session
+
+    Returns:
+        Updated word object
+    """
+    # Store old interval for history
+    interval_before = word.interval
+
+    # Calculate new scheduling using SM-2
+    new_ef, new_interval, new_repetitions, next_review = calculate_sm2_interval(word, quality)
+
+    # Easiness hell fix: Reset EF after 10 consecutive successes if still low
+    if quality >= 3 and new_repetitions >= 10 and new_ef < 2.0:
+        print(f"🔧 Easiness hell fix for '{word.dutch_word}': Resetting EF from {new_ef:.2f} to 2.5")
+        new_ef = 2.5
+
+    # Update word statistics
+    word.review_count += 1
+    if quality >= 3:
+        word.correct_count += 1
+    word.easiness_factor = new_ef
+    word.interval = new_interval
+    word.repetitions = new_repetitions
+    word.last_reviewed = datetime.utcnow()
+    word.next_review = next_review
+
+    # Create review history entry
+    history = ReviewHistory(
+        word_id=word.id,
+        quality=quality,
+        interval_before=interval_before,
+        interval_after=new_interval,
+        easiness_factor_after=new_ef
+    )
+    db.add(history)
+
+    # Update or create study session for today
+    today = date.today()
+    session = db.query(StudySession).filter(StudySession.session_date == today).first()
+    if session:
+        session.cards_reviewed += 1
+    else:
+        session = StudySession(session_date=today, cards_reviewed=1)
+        db.add(session)
+
+    return word
 
 
 async def generate_translation_and_mnemonic(dutch_word: str, use_claude: bool = False) -> dict:
@@ -1263,46 +1326,8 @@ def submit_review(review: ReviewSubmit, db: Session = Depends(get_db)):
     if not word:
         raise HTTPException(status_code=404, detail="Word not found")
 
-    # Store old values for history
-    old_interval = word.interval
-
-    # Calculate new scheduling using SM-2
-    new_ef, new_interval, new_repetitions, next_review = calculate_sm2_interval(word, review.quality)
-
-    # Easiness hell fix: Reset EF after 10 consecutive successes if still low
-    # This prevents words from getting permanently stuck with low EF
-    if review.quality >= 3 and new_repetitions >= 10 and new_ef < 2.0:
-        print(f"🔧 Easiness hell fix for '{word.dutch_word}': Resetting EF from {new_ef:.2f} to 2.5")
-        new_ef = 2.5
-
-    # Update word
-    word.review_count += 1
-    if review.quality >= 3:
-        word.correct_count += 1
-    word.easiness_factor = new_ef
-    word.interval = new_interval
-    word.repetitions = new_repetitions
-    word.last_reviewed = datetime.utcnow()
-    word.next_review = next_review
-
-    # Create review history entry
-    history = ReviewHistory(
-        word_id=word.id,
-        quality=review.quality,
-        interval_before=old_interval,
-        interval_after=new_interval,
-        easiness_factor_after=new_ef
-    )
-    db.add(history)
-
-    # Update or create study session for today
-    today = date.today()
-    session = db.query(StudySession).filter(StudySession.session_date == today).first()
-    if session:
-        session.cards_reviewed += 1
-    else:
-        session = StudySession(session_date=today, cards_reviewed=1)
-        db.add(session)
+    # Use shared function to update review statistics
+    word = update_word_review_stats(word, review.quality, db)
 
     db.commit()
     db.refresh(word)
@@ -1621,59 +1646,14 @@ def check_multiple_choice_answer(answer: MultipleChoiceAnswer, db: Session = Dep
 
     is_correct = answer.selected_answer.strip() == answer.correct_answer.strip()
 
-    # Update word statistics (similar to review mode)
     # Map quiz result to quality score (5 for correct, 0 for wrong)
     quality = 5 if is_correct else 0
 
-    # Store interval before update
-    interval_before = word.interval
-
-    # Update spaced repetition using existing update_spaced_repetition function
-    from datetime import datetime
-    word.last_reviewed = datetime.utcnow()
-    word.review_count += 1
-
-    if quality >= 3:  # Correct answer
-        word.correct_count += 1
-        word.repetitions += 1
-        word.easiness_factor = max(1.3, word.easiness_factor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)))
-
-        if word.repetitions == 1:
-            word.interval = 1
-        elif word.repetitions == 2:
-            word.interval = 6
-        else:
-            word.interval = round(word.interval * word.easiness_factor)
-    else:  # Wrong answer
-        word.repetitions = 0
-        word.interval = 1
-        word.easiness_factor = max(1.3, word.easiness_factor - 0.2)
-
-    # Calculate next review date
-    from datetime import timedelta
-    word.next_review = datetime.utcnow() + timedelta(days=word.interval)
-
-    # Create review history entry
-    history_entry = ReviewHistory(
-        word_id=word.id,
-        reviewed_at=datetime.utcnow(),
-        quality=quality,
-        interval_before=interval_before,
-        interval_after=word.interval,
-        easiness_factor_after=word.easiness_factor
-    )
-    db.add(history_entry)
-
-    # Update study session
-    from datetime import date
-    today = date.today()
-    session = db.query(StudySession).filter(StudySession.session_date == today).first()
-    if not session:
-        session = StudySession(session_date=today, cards_reviewed=0, session_duration_minutes=0)
-        db.add(session)
-    session.cards_reviewed += 1
+    # Use shared function to update review statistics
+    word = update_word_review_stats(word, quality, db)
 
     db.commit()
+    db.refresh(word)
 
     if is_correct:
         message = "🎉 Correct! Goed gedaan!"

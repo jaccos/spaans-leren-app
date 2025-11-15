@@ -22,7 +22,7 @@ class Word(Base):
     id = Column(Integer, primary_key=True, index=True)
     dutch_word = Column(String, index=True, nullable=False)
     spanish_word = Column(String, index=True, nullable=False)
-    category = Column(String, default="algemeen")
+    category = Column(String, default="algemeen", index=True)  # Added index for filtering by category
     mnemonic_text = Column(Text)  # Tekstuele geheugensteun
     mnemonic_image = Column(Text)  # Base64 encoded image of SVG
     conjugations = Column(Text)  # JSON string voor werkwoordvervoegingen
@@ -33,17 +33,17 @@ class Word(Base):
     related_words = Column(Text)  # JSON: {"synonyms": [...], "antonyms": [...], "family": [...]}
     video_url = Column(String)  # Optional YouTube embed URL
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)  # Added index for sorting by date
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Spaced Repetition fields (SM-2 algorithm)
     review_count = Column(Integer, default=0)  # Total times reviewed
     correct_count = Column(Integer, default=0)  # Times answered correctly (quality >= 3)
     easiness_factor = Column(Float, default=2.5)  # SM-2 easiness factor (1.3 - 2.5+)
-    interval = Column(Integer, default=0)  # Days until next review
+    interval = Column(Integer, default=0, index=True)  # Days until next review - indexed for stats queries
     repetitions = Column(Integer, default=0)  # Consecutive correct reviews
-    last_reviewed = Column(DateTime, nullable=True)  # Last review timestamp
-    next_review = Column(DateTime, default=datetime.utcnow, index=True)  # When to review next
+    last_reviewed = Column(DateTime, nullable=True, index=True)  # Last review timestamp - indexed for filtering
+    next_review = Column(DateTime, default=datetime.utcnow, index=True)  # When to review next - critical for due queries
 
     # Relationship
     review_history = relationship("ReviewHistory", back_populates="word", cascade="all, delete-orphan")

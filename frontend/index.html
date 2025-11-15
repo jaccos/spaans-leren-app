@@ -3,71 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spaans Leren - Voor Jacco 🇪🇸</title>
+    <title>Spaans Leren</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #64748b;
+            --accent: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --border: #e2e8f0;
+        }
+
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
+
         .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
         }
-        
+
         .card-hover:hover {
-            transform: translateY(-8px) scale(1.02);
-        }
-        
-        .blob {
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            animation: blob 8s ease-in-out infinite;
-        }
-        
-        @keyframes blob {
-            0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-            25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
-            50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
-            75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
-        }
-        
-        .shine {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .shine::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-        
-        .shine:hover::before {
-            left: 100%;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -598,137 +568,115 @@
 
             return (
                 <div className="min-h-screen pb-12">
-                    {/* Hero Header met gradient */}
-                    <div className="gradient-bg text-white py-8 px-4 shadow-2xl relative overflow-hidden">
-                        {/* Decoratieve blobs */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 blob"></div>
-                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-10 blob" style={{animationDelay: '2s'}}></div>
-                        
-                        <div className="max-w-6xl mx-auto relative z-10">
-                            <div className="flex items-center gap-4 mb-4">
-                                <span className="text-6xl">🇪🇸</span>
+                    {/* Professional Header */}
+                    <div className="bg-white border-b border-gray-200 py-6 px-4 shadow-sm">
+                        <div className="max-w-6xl mx-auto">
+                            <div className="flex items-center justify-between mb-6">
                                 <div>
-                                    <h1 className="text-5xl font-black mb-2">Spaans Leren</h1>
-                                    <p className="text-xl opacity-90 font-medium">met AI-powered geheugensteun 🧠✨</p>
+                                    <h1 className="text-3xl font-bold text-gray-900 mb-1">Spaans Leren</h1>
+                                    <p className="text-gray-600">Vocabulaire training met spaced repetition</p>
                                 </div>
                             </div>
-                            
-                            <div className="flex gap-4 flex-wrap mt-6">
-                                <div className="bg-white bg-opacity-20 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-3 shine">
-                                    <span className="text-3xl">📚</span>
-                                    <div>
-                                        <p className="text-sm opacity-75">Woorden geleerd</p>
-                                        <p className="text-2xl font-bold">{stats.total_words}</p>
-                                    </div>
+
+                            <div className="grid grid-cols-4 gap-4">
+                                <div className="bg-white border border-gray-200 rounded-lg px-5 py-3 card-hover">
+                                    <p className="text-sm text-gray-600 mb-1">Woorden</p>
+                                    <p className="text-2xl font-semibold text-gray-900">{stats.total_words}</p>
                                 </div>
-                                <div className="bg-white bg-opacity-20 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-3 shine">
-                                    <span className="text-3xl">🔥</span>
-                                    <div>
-                                        <p className="text-sm opacity-75">Huidige streak</p>
-                                        <p className="text-2xl font-bold">{streakData.current_streak} dagen</p>
-                                    </div>
+                                <div className="bg-white border border-gray-200 rounded-lg px-5 py-3 card-hover">
+                                    <p className="text-sm text-gray-600 mb-1">Streak</p>
+                                    <p className="text-2xl font-semibold text-gray-900">{streakData.current_streak} dagen</p>
                                 </div>
-                                <div className="bg-white bg-opacity-20 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-3 shine">
-                                    <span className="text-3xl">⏰</span>
-                                    <div>
-                                        <p className="text-sm opacity-75">Due vandaag</p>
-                                        <p className="text-2xl font-bold">{reviewStats.due_today}</p>
-                                    </div>
+                                <div className="bg-white border border-gray-200 rounded-lg px-5 py-3 card-hover">
+                                    <p className="text-sm text-gray-600 mb-1">Te herhalen</p>
+                                    <p className="text-2xl font-semibold text-gray-900">{reviewStats.due_today}</p>
                                 </div>
-                                <div className="bg-white bg-opacity-20 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-3 shine">
-                                    <span className="text-3xl">✅</span>
-                                    <div>
-                                        <p className="text-sm opacity-75">Vandaag geoefend</p>
-                                        <p className="text-2xl font-bold">{reviewStats.total_reviews_today}</p>
-                                    </div>
+                                <div className="bg-white border border-gray-200 rounded-lg px-5 py-3 card-hover">
+                                    <p className="text-sm text-gray-600 mb-1">Vandaag</p>
+                                    <p className="text-2xl font-semibold text-gray-900">{reviewStats.total_reviews_today}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div className="max-w-6xl mx-auto px-4 mt-8">
-                        {/* Moderne Tab Navigation */}
-                        <div className="bg-white rounded-3xl shadow-2xl mb-8 overflow-hidden">
+                        {/* Tab Navigation */}
+                        <div className="bg-white border border-gray-200 rounded-lg mb-8 overflow-hidden shadow-sm">
                             <div className="grid grid-cols-5 gap-0">
                                 <button
                                     onClick={() => setActiveTab('add')}
-                                    className={`px-6 py-6 font-bold text-lg flex items-center justify-center gap-2 transition-all ${
+                                    className={`px-6 py-4 font-semibold text-base flex items-center justify-center transition-all border-b-2 ${
                                         activeTab === 'add'
-                                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-inner'
-                                            : 'text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-blue-50 text-blue-700 border-blue-700'
+                                            : 'text-gray-600 hover:bg-gray-50 border-transparent'
                                     }`}
                                 >
-                                    <span className="text-2xl">✨</span>
                                     Toevoegen
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('list')}
-                                    className={`px-6 py-6 font-bold text-lg flex items-center justify-center gap-2 transition-all ${
+                                    className={`px-6 py-4 font-semibold text-base flex items-center justify-center transition-all border-b-2 ${
                                         activeTab === 'list'
-                                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-inner'
-                                            : 'text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-blue-50 text-blue-700 border-blue-700'
+                                            : 'text-gray-600 hover:bg-gray-50 border-transparent'
                                     }`}
                                 >
-                                    <span className="text-2xl">📖</span>
                                     Lijst
                                 </button>
                                 <button
                                     onClick={startReview}
-                                    className={`px-6 py-6 font-bold text-lg flex items-center justify-center gap-2 transition-all relative ${
+                                    className={`px-6 py-4 font-semibold text-base flex items-center justify-center transition-all relative border-b-2 ${
                                         activeTab === 'review'
-                                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-inner'
-                                            : 'text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-blue-50 text-blue-700 border-blue-700'
+                                            : 'text-gray-600 hover:bg-gray-50 border-transparent'
                                     }`}
                                 >
-                                    <span className="text-2xl">🎯</span>
                                     Review
                                     {reviewStats.due_today > 0 && (
-                                        <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                        <span className="ml-2 bg-red-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
                                             {reviewStats.due_today}
                                         </span>
                                     )}
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('practice')}
-                                    className={`px-6 py-6 font-bold text-lg flex items-center justify-center gap-2 transition-all ${
+                                    className={`px-6 py-4 font-semibold text-base flex items-center justify-center transition-all border-b-2 ${
                                         activeTab === 'practice'
-                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-inner'
-                                            : 'text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-blue-50 text-blue-700 border-blue-700'
+                                            : 'text-gray-600 hover:bg-gray-50 border-transparent'
                                     }`}
                                 >
-                                    <span className="text-2xl">🎧</span>
                                     Oefenen
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('stats')}
-                                    className={`px-6 py-6 font-bold text-lg flex items-center justify-center gap-2 transition-all ${
+                                    className={`px-6 py-4 font-semibold text-base flex items-center justify-center transition-all border-b-2 ${
                                         activeTab === 'stats'
-                                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-inner'
-                                            : 'text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-blue-50 text-blue-700 border-blue-700'
+                                            : 'text-gray-600 hover:bg-gray-50 border-transparent'
                                     }`}
                                 >
-                                    <span className="text-2xl">📊</span>
-                                    Stats
+                                    Statistieken
                                 </button>
                             </div>
                         </div>
 
                         {/* Add Word Tab */}
                         {activeTab === 'add' && (
-                            <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
+                            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8 mb-8">
                                 <div className="max-w-2xl mx-auto">
-                                    <h2 className="text-4xl font-black mb-3 gradient-text">Type een Nederlands Woord</h2>
-                                    <p className="text-gray-600 text-lg mb-8">De AI zorgt voor vertaling, categorie, geheugensteun én visualisatie! 🚀</p>
-                                    
-                                    <form onSubmit={handleAddWord} className="space-y-6">
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Nieuw woord toevoegen</h2>
+                                    <p className="text-gray-600 mb-6">Voer een Nederlands woord in. De AI genereert automatisch de vertaling, categorie en geheugensteun.</p>
+
+                                    <form onSubmit={handleAddWord} className="space-y-4">
                                         <div>
                                             <input
                                                 ref={dutchWordInputRef}
                                                 type="text"
                                                 value={dutchWord}
                                                 onChange={(e) => setDutchWord(e.target.value)}
-                                                placeholder="bijv. huis, kat, lopen, mooi..."
-                                                className="w-full px-6 py-5 text-2xl font-semibold border-4 border-purple-200 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-200 transition-all outline-none"
+                                                placeholder="Bijv. huis, kat, lopen, mooi..."
+                                                className="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
                                                 disabled={loading}
                                                 autoFocus
                                             />
@@ -737,25 +685,19 @@
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="w-full px-8 py-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xl font-bold rounded-2xl hover:shadow-2xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shine"
+                                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {loading ? (
-                                                <span className="flex items-center justify-center gap-3">
-                                                    <span className="animate-spin text-3xl">🤖</span>
-                                                    AI is bezig met magie...
-                                                </span>
+                                                <span>Bezig met verwerken...</span>
                                             ) : (
-                                                <span className="flex items-center justify-center gap-3">
-                                                    <span className="text-3xl">✨</span>
-                                                    Voeg toe met AI!
-                                                </span>
+                                                <span>Woord toevoegen</span>
                                             )}
                                         </button>
 
                                         {loading && (
-                                            <div className="bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-2xl p-6 text-center">
-                                                <p className="text-purple-800 font-semibold text-lg">
-                                                    🎨 AI genereert vertaling, categorie, geheugensteun en visualisatie...
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                                                <p className="text-blue-800 text-sm">
+                                                    AI genereert de vertaling, categorie, geheugensteun en visualisatie...
                                                 </p>
                                             </div>
                                         )}
@@ -767,136 +709,133 @@
                         {/* List Tab - Nieuwe Tabel View */}
                         {activeTab === 'list' && (
                             <div className="space-y-6">
-                                {/* Enhanced Search Bar */}
-                                <div className="bg-white rounded-3xl shadow-xl p-6">
+                                {/* Search Bar */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                                     <div className="relative mb-4">
-                                        <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-3xl">🔍</span>
                                         <input
                                             type="text"
                                             placeholder="Zoek op Nederlands, Spaans of categorie..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="w-full pl-16 pr-6 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                                            className="w-full pl-4 pr-6 py-3 text-base border border-gray-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
                                         />
                                     </div>
-                                    
+
                                     <div className="flex items-center gap-3 text-sm text-gray-600">
-                                        <span className="font-semibold">💡 Tips:</span>
-                                        <span className="bg-gray-100 px-3 py-1 rounded-full">Type een categorie</span>
-                                        <span className="bg-gray-100 px-3 py-1 rounded-full">Nederlands woord</span>
-                                        <span className="bg-gray-100 px-3 py-1 rounded-full">Spaans woord</span>
+                                        <span className="font-semibold">Search tips:</span>
+                                        <span className="bg-gray-100 px-3 py-1 rounded-full">Categorie</span>
+                                        <span className="bg-gray-100 px-3 py-1 rounded-full">Nederlands</span>
+                                        <span className="bg-gray-100 px-3 py-1 rounded-full">Spaans</span>
                                     </div>
                                 </div>
 
                                 {/* Stats */}
-                                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-3xl shadow-xl p-6">
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg shadow-sm p-6">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-4xl">📚</span>
                                             <div>
-                                                <p className="text-sm opacity-90">Totaal gevonden</p>
-                                                <p className="text-3xl font-bold">{filteredWords.length} woorden</p>
+                                                <p className="text-sm text-gray-600">Totaal gevonden</p>
+                                                <p className="text-2xl font-bold text-gray-900">{filteredWords.length} woorden</p>
                                             </div>
                                         </div>
                                         {searchTerm && (
                                             <button
                                                 onClick={() => setSearchTerm('')}
-                                                className="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-xl font-semibold transition-all"
+                                                className="bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg font-semibold text-gray-700 transition-all"
                                             >
-                                                ✖️ Wis zoekopdracht
+                                                Wis zoekopdracht
                                             </button>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Tabel View */}
-                                <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                                            <thead className="bg-gray-50 border-b border-gray-200">
                                                 <tr>
-                                                    <th className="px-6 py-4 text-left font-bold text-lg">📝 Nederlands</th>
-                                                    <th className="px-6 py-4 text-left font-bold text-lg">🇪🇸 Spaans</th>
-                                                    <th className="px-6 py-4 text-left font-bold text-lg">🏷️ Categorie</th>
-                                                    <th className="px-6 py-4 text-center font-bold text-lg">📊 Stats</th>
-                                                    <th className="px-6 py-4 text-center font-bold text-lg">📈 History</th>
-                                                    <th className="px-6 py-4 text-center font-bold text-lg">🗑️</th>
+                                                    <th className="px-6 py-3 text-left font-semibold text-sm text-gray-700">Nederlands</th>
+                                                    <th className="px-6 py-3 text-left font-semibold text-sm text-gray-700">Spaans</th>
+                                                    <th className="px-6 py-3 text-left font-semibold text-sm text-gray-700">Categorie</th>
+                                                    <th className="px-6 py-3 text-center font-semibold text-sm text-gray-700">Stats</th>
+                                                    <th className="px-6 py-3 text-center font-semibold text-sm text-gray-700">History</th>
+                                                    <th className="px-6 py-3 text-center font-semibold text-sm text-gray-700">Acties</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {filteredWords
                                                     .sort((a, b) => a.dutch_word.localeCompare(b.dutch_word, 'nl'))
                                                     .map((word, index) => (
-                                                    <tr 
+                                                    <tr
                                                         key={word.id}
                                                         onClick={() => setSelectedWord(word)}
-                                                        className={`border-b border-gray-100 cursor-pointer transition-all hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 ${
-                                                            index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                                                        className={`border-b border-gray-100 cursor-pointer transition-all hover:bg-blue-50 ${
+                                                            index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                                                         }`}
                                                     >
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="text-2xl">📌</span>
-                                                                <span className="font-bold text-xl text-gray-800">{word.dutch_word}</span>
-                                                            </div>
+                                                        <td className="px-6 py-3">
+                                                            <span className="font-semibold text-base text-gray-900">{word.dutch_word}</span>
                                                         </td>
-                                                        <td className="px-6 py-4">
+                                                        <td className="px-6 py-3">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="font-bold text-xl gradient-text">{word.spanish_word}</span>
+                                                                <span className="font-semibold text-base text-gray-900">{word.spanish_word}</span>
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         playAudio(word.id);
                                                                     }}
-                                                                    className="text-2xl hover:scale-110 transition-transform"
+                                                                    className="text-blue-600 hover:text-blue-800 transition-colors"
                                                                     title="Luister uitspraak"
                                                                 >
-                                                                    🔊
+                                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M10 3.5a.5.5 0 00-.5-.5h-2a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-13zM15.5 7a.5.5 0 01.5.5v5a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-5a.5.5 0 01.5-.5h2z"/>
+                                                                    </svg>
                                                                 </button>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4">
+                                                        <td className="px-6 py-3">
                                                             <div className="flex flex-col gap-2">
-                                                                <span className="bg-gradient-to-r from-orange-400 to-red-400 text-white px-4 py-2 rounded-full font-semibold text-sm">
+                                                                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg font-medium text-xs inline-block w-fit">
                                                                     {word.category ? word.category.replace('_', ' ') : 'algemeen'}
                                                                 </span>
                                                                 {(() => {
                                                                     const boxInfo = getLeitnerBoxInfo(word.leitner_box || 0);
                                                                     return (
-                                                                        <span className={`bg-gradient-to-r ${boxInfo.colors} text-white px-3 py-1 rounded-full font-semibold text-xs`}>
-                                                                            {boxInfo.emoji} Box {word.leitner_box || 0}: {boxInfo.label}
+                                                                        <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-lg font-medium text-xs inline-block w-fit">
+                                                                            Box {word.leitner_box || 0}: {boxInfo.label}
                                                                         </span>
                                                                     );
                                                                 })()}
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 text-center">
+                                                        <td className="px-6 py-3 text-center">
                                                             <div className="flex flex-col gap-1 text-xs">
-                                                                <span className="font-semibold text-gray-700">Reviews: {word.review_count}</span>
-                                                                <span className="text-green-600 font-bold">✓ {word.correct_count}</span>
+                                                                <span className="font-medium text-gray-700">Reviews: {word.review_count}</span>
+                                                                <span className="text-green-600 font-medium">Correct: {word.correct_count}</span>
                                                                 <span className="text-gray-500">Next: {word.interval}d</span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 text-center">
+                                                        <td className="px-6 py-3 text-center">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     loadWordHistory(word.id);
                                                                 }}
-                                                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold transition-all transform hover:scale-110"
+                                                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                                                             >
-                                                                📈
+                                                                Bekijk
                                                             </button>
                                                         </td>
-                                                        <td className="px-6 py-4 text-center">
+                                                        <td className="px-6 py-3 text-center">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleDeleteWord(word.id);
                                                                 }}
-                                                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl font-semibold transition-all transform hover:scale-110"
+                                                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                                                             >
-                                                                🗑️
+                                                                Verwijder
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -907,15 +846,14 @@
                                 </div>
 
                                 {filteredWords.length === 0 && (
-                                    <div className="bg-white rounded-3xl shadow-xl p-16 text-center">
-                                        <p className="text-6xl mb-4">😴</p>
-                                        <p className="text-gray-500 text-2xl font-semibold mb-4">
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                                        <p className="text-gray-500 text-lg font-medium mb-4">
                                             {searchTerm ? 'Geen woorden gevonden' : 'Nog geen woorden toegevoegd'}
                                         </p>
                                         {searchTerm && (
                                             <button
                                                 onClick={() => setSearchTerm('')}
-                                                className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold"
+                                                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
                                             >
                                                 Wis zoekopdracht
                                             </button>
@@ -923,9 +861,9 @@
                                         {!searchTerm && (
                                             <button
                                                 onClick={() => setActiveTab('add')}
-                                                className="mt-6 px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-105 transition-all"
+                                                className="mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                                             >
-                                                ✨ Voeg je eerste woord toe!
+                                                Voeg je eerste woord toe
                                             </button>
                                         )}
                                     </div>
@@ -937,53 +875,46 @@
                         {activeTab === 'review' && (
                             <div className="max-w-3xl mx-auto">
                                 {dueWords.length === 0 ? (
-                                    <div className="bg-white rounded-3xl shadow-2xl p-16 text-center">
-                                        <p className="text-6xl mb-6">🎉</p>
-                                        <h2 className="text-4xl font-black gradient-text mb-4">Geen kaarten meer vandaag!</h2>
-                                        <p className="text-gray-600 text-xl mb-8">
-                                            Kom morgen terug voor meer oefening, of check je statistieken! 📊
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Geen kaarten meer vandaag</h2>
+                                        <p className="text-gray-600 text-base mb-8">
+                                            Kom morgen terug voor meer oefening, of bekijk je statistieken
                                         </p>
                                         <div className="flex gap-4 justify-center">
                                             <button
                                                 onClick={() => setActiveTab('stats')}
-                                                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-105 transition-all"
+                                                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                                             >
-                                                📊 Bekijk Stats
+                                                Bekijk Stats
                                             </button>
                                             <button
                                                 onClick={() => setActiveTab('add')}
-                                                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-105 transition-all"
+                                                className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors"
                                             >
-                                                ✨ Voeg Woord Toe
+                                                Voeg Woord Toe
                                             </button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="bg-white rounded-3xl shadow-2xl p-8">
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                                         {/* Session Progress Bar */}
-                                        <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
+                                        <div className="mb-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
                                             <div className="flex items-center justify-between mb-3">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-3xl">🎯</span>
-                                                    <div>
-                                                        <div className="text-lg font-bold text-gray-800">
-                                                            Dagelijks Doel: {Math.min(reviewStats.total_reviews_today, dailyGoal)}/{dailyGoal} kaarten
-                                                        </div>
-                                                        <div className="text-sm text-gray-600">
-                                                            {reviewStats.total_reviews_today >= dailyGoal ?
-                                                                '🎉 Doel bereikt! Ga zo door!' :
-                                                                `Nog ${dailyGoal - reviewStats.total_reviews_today} te gaan!`
-                                                            }
-                                                        </div>
+                                                <div>
+                                                    <div className="text-base font-semibold text-gray-900">
+                                                        Dagelijks Doel: {Math.min(reviewStats.total_reviews_today, dailyGoal)}/{dailyGoal} kaarten
+                                                    </div>
+                                                    <div className="text-sm text-gray-600">
+                                                        {reviewStats.total_reviews_today >= dailyGoal ?
+                                                            'Doel bereikt! Uitstekend werk!' :
+                                                            `Nog ${dailyGoal - reviewStats.total_reviews_today} te gaan`
+                                                        }
                                                     </div>
                                                 </div>
-                                                {reviewStats.total_reviews_today >= dailyGoal && (
-                                                    <span className="text-5xl animate-bounce">🏆</span>
-                                                )}
                                             </div>
-                                            <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+                                            <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                                                 <div
-                                                    className="absolute h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-500"
+                                                    className="absolute h-full bg-blue-600 transition-all duration-500"
                                                     style={{ width: `${Math.min((reviewStats.total_reviews_today / dailyGoal) * 100, 100)}%` }}
                                                 ></div>
                                             </div>
@@ -991,10 +922,10 @@
 
                                         <div className="text-center mb-6">
                                             <div className="flex items-center justify-center gap-4 mb-4">
-                                                <span className="text-lg font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3 rounded-full shadow-lg">
-                                                    🎯 Spaced Repetition Review
+                                                <span className="text-base font-semibold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
+                                                    Spaced Repetition Review
                                                 </span>
-                                                <span className="text-sm font-semibold text-gray-600 bg-blue-100 px-4 py-2 rounded-full">
+                                                <span className="text-sm font-medium text-gray-700 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
                                                     {dueWords.length} kaarten te doen
                                                 </span>
                                                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1002,38 +933,37 @@
                                                         type="checkbox"
                                                         checked={typeModeEnabled}
                                                         onChange={(e) => setTypeModeEnabled(e.target.checked)}
-                                                        className="w-5 h-5"
+                                                        className="w-4 h-4"
                                                     />
-                                                    <span className="text-sm font-semibold text-gray-700">⌨️ Type Modus</span>
+                                                    <span className="text-sm font-medium text-gray-700">Type Modus</span>
                                                 </label>
                                             </div>
                                         </div>
 
                                         <div
-                                            className="bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 rounded-3xl p-12 min-h-[400px] flex flex-col items-center justify-center"
+                                            className="bg-gray-50 border border-gray-200 rounded-lg p-12 min-h-[400px] flex flex-col items-center justify-center"
                                         >
                                             {!isChecked ? (
                                                 <>
-                                                    <p className="text-6xl mb-6">🤔</p>
-                                                    <h2 className="text-5xl font-black text-gray-800 mb-6 text-center">
+                                                    <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
                                                         {dueWords[flashcardIndex].dutch_word}
                                                     </h2>
 
                                                     {typeModeEnabled ? (
                                                         <>
-                                                            <p className="text-gray-600 text-lg font-semibold mb-4">
-                                                                ⌨️ Type het Spaanse woord:
+                                                            <p className="text-gray-700 text-base font-medium mb-4">
+                                                                Type het Spaanse woord:
                                                             </p>
 
                                                             {/* Spanish Character Helper */}
-                                                            <div className="mb-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 max-w-md mx-auto">
-                                                                <p className="text-xs text-amber-700 font-semibold mb-2">🇪🇸 Spaanse tekens:</p>
+                                                            <div className="mb-4 p-3 bg-white rounded-lg border border-gray-300 max-w-md mx-auto">
+                                                                <p className="text-xs text-gray-600 font-medium mb-2">Spaanse tekens:</p>
                                                                 <div className="flex flex-wrap gap-2 justify-center">
                                                                     {['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', '¿', '¡'].map(char => (
                                                                         <button
                                                                             key={char}
                                                                             onClick={() => insertSpanishCharReview(char)}
-                                                                            className="px-3 py-1.5 bg-white hover:bg-amber-100 border border-amber-300 rounded-lg text-lg font-bold text-amber-800 transition-all hover:scale-110 hover:shadow-md"
+                                                                            className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-lg text-base font-semibold text-gray-700 transition-colors"
                                                                             type="button"
                                                                         >
                                                                             {char}
@@ -1049,15 +979,15 @@
                                                                 onChange={(e) => setUserAnswer(e.target.value)}
                                                                 onKeyPress={(e) => e.key === 'Enter' && userAnswer.trim() && checkAnswer()}
                                                                 placeholder="Typ je antwoord..."
-                                                                className="px-6 py-4 text-2xl text-center border-2 border-gray-300 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none w-full max-w-md mb-4"
+                                                                className="px-6 py-3 text-xl text-center border border-gray-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all outline-none w-full max-w-md mb-4"
                                                                 autoFocus
                                                             />
                                                             <button
                                                                 onClick={checkAnswer}
                                                                 disabled={!userAnswer.trim()}
-                                                                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold text-lg rounded-2xl hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                className="px-6 py-3 bg-blue-600 text-white font-semibold text-base rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                             >
-                                                                ✓ Check Antwoord
+                                                                Check Antwoord
                                                             </button>
                                                         </>
                                                     ) : (
@@ -1066,9 +996,9 @@
                                                                 setIsChecked(true);
                                                                 setShowAnswer(true);
                                                             }}
-                                                            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-xl rounded-2xl hover:shadow-xl transform hover:scale-105 transition-all"
+                                                            className="px-6 py-3 bg-blue-600 text-white font-semibold text-base rounded-lg hover:bg-blue-700 transition-colors"
                                                         >
-                                                            👀 Toon Antwoord
+                                                            Toon Antwoord
                                                         </button>
                                                     )}
                                                 </>
@@ -1076,14 +1006,14 @@
                                                 <>
                                                     {/* Feedback Badge */}
                                                     {typeModeEnabled && checkResult && (
-                                                        <div className={`mb-6 px-8 py-4 rounded-2xl font-bold text-2xl flex items-center gap-3 ${
-                                                            checkResult === 'correct' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' :
-                                                            checkResult === 'close' ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' :
-                                                            'bg-gradient-to-r from-red-500 to-pink-500 text-white'
+                                                        <div className={`mb-6 px-6 py-3 rounded-lg font-semibold text-base border ${
+                                                            checkResult === 'correct' ? 'bg-green-50 text-green-800 border-green-200' :
+                                                            checkResult === 'close' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                                                            'bg-red-50 text-red-800 border-red-200'
                                                         }`}>
-                                                            {checkResult === 'correct' && <><span className="text-4xl">✅</span> Perfect!</>}
-                                                            {checkResult === 'close' && <><span className="text-4xl">⚠️</span> Bijna goed! (kleine typfout)</>}
-                                                            {checkResult === 'wrong' && <><span className="text-4xl">❌</span> Helaas, niet correct</>}
+                                                            {checkResult === 'correct' && 'Correct'}
+                                                            {checkResult === 'close' && 'Bijna goed (kleine typfout)'}
+                                                            {checkResult === 'wrong' && 'Niet correct'}
                                                         </div>
                                                     )}
 
@@ -1102,31 +1032,33 @@
                                                     )}
 
                                                     <div className="flex flex-col items-center gap-3 mb-4">
-                                                        <h2 className="text-6xl font-black gradient-text text-center">
+                                                        <h2 className="text-5xl font-bold text-gray-900 text-center">
                                                             {dueWords[flashcardIndex].spanish_word}
                                                         </h2>
                                                         <button
                                                             onClick={() => playAudio(dueWords[flashcardIndex].id)}
-                                                            className="text-4xl hover:scale-110 transition-transform"
+                                                            className="text-blue-600 hover:text-blue-800 transition-colors"
                                                             title="Luister uitspraak"
                                                         >
-                                                            🔊
+                                                            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M10 3.5a.5.5 0 00-.5-.5h-2a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-13zM15.5 7a.5.5 0 01.5.5v5a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-5a.5.5 0 01.5-.5h2z"/>
+                                                            </svg>
                                                         </button>
                                                     </div>
-                                                    <p className="text-3xl text-gray-800 font-bold mb-6">
+                                                    <p className="text-2xl text-gray-700 font-semibold mb-6">
                                                         {dueWords[flashcardIndex].dutch_word}
                                                     </p>
                                                     {dueWords[flashcardIndex].mnemonic_image && (
                                                         <img
                                                             src={dueWords[flashcardIndex].mnemonic_image}
                                                             alt="Visual"
-                                                            className="max-w-full h-48 object-contain mb-4 rounded-2xl"
+                                                            className="max-w-full h-48 object-contain mb-4 rounded-lg"
                                                         />
                                                     )}
                                                     {dueWords[flashcardIndex].mnemonic_text && (
-                                                        <div className="bg-white bg-opacity-90 p-4 rounded-2xl max-w-lg">
+                                                        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg max-w-lg">
                                                             <p className="text-gray-700 text-center font-medium text-sm">
-                                                                💡 {dueWords[flashcardIndex].mnemonic_text}
+                                                                {dueWords[flashcardIndex].mnemonic_text}
                                                             </p>
                                                         </div>
                                                     )}
@@ -1138,8 +1070,8 @@
                                         {isChecked && (
                                             <>
                                                 {typeModeEnabled && checkResult && (
-                                                    <p className="text-center text-sm text-gray-600 mb-2 font-semibold">
-                                                        💡 Suggestie: {
+                                                    <p className="text-center text-sm text-gray-600 mb-2 font-medium">
+                                                        Suggestie: {
                                                             checkResult === 'correct' ? 'Good of Easy' :
                                                             checkResult === 'close' ? 'Hard' :
                                                             'Again'
@@ -1149,43 +1081,39 @@
                                                 <div className="grid grid-cols-4 gap-3 mt-6">
                                                     <button
                                                         onClick={() => submitReview(0)}
-                                                        className={`px-4 py-4 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl hover:shadow-xl font-bold transition-all transform hover:scale-105 ${
-                                                            checkResult === 'wrong' ? 'ring-4 ring-red-300 scale-105' : ''
+                                                        className={`px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors ${
+                                                            checkResult === 'wrong' ? 'ring-2 ring-red-400' : ''
                                                         }`}
                                                     >
-                                                        <div className="text-3xl mb-1">😰</div>
                                                         <div className="text-sm">Again</div>
-                                                        <div className="text-xs opacity-75 mt-1">&lt;1 dag</div>
+                                                        <div className="text-xs opacity-90 mt-1">&lt;1 dag</div>
                                                     </button>
                                                     <button
                                                         onClick={() => submitReview(3)}
-                                                        className={`px-4 py-4 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl hover:shadow-xl font-bold transition-all transform hover:scale-105 ${
-                                                            checkResult === 'close' ? 'ring-4 ring-orange-300 scale-105' : ''
+                                                        className={`px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-semibold transition-colors ${
+                                                            checkResult === 'close' ? 'ring-2 ring-yellow-400' : ''
                                                         }`}
                                                     >
-                                                        <div className="text-3xl mb-1">😅</div>
                                                         <div className="text-sm">Hard</div>
-                                                        <div className="text-xs opacity-75 mt-1">Moeilijk</div>
+                                                        <div className="text-xs opacity-90 mt-1">Moeilijk</div>
                                                     </button>
                                                     <button
                                                         onClick={() => submitReview(4)}
-                                                        className={`px-4 py-4 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl hover:shadow-xl font-bold transition-all transform hover:scale-105 ${
-                                                            checkResult === 'correct' ? 'ring-4 ring-green-300 scale-105' : ''
+                                                        className={`px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors ${
+                                                            checkResult === 'correct' ? 'ring-2 ring-green-400' : ''
                                                         }`}
                                                     >
-                                                        <div className="text-3xl mb-1">😊</div>
                                                         <div className="text-sm">Good</div>
-                                                        <div className="text-xs opacity-75 mt-1">Ging goed</div>
+                                                        <div className="text-xs opacity-90 mt-1">Ging goed</div>
                                                     </button>
                                                     <button
                                                         onClick={() => submitReview(5)}
-                                                        className={`px-4 py-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl hover:shadow-xl font-bold transition-all transform hover:scale-105 ${
-                                                            checkResult === 'correct' ? 'ring-4 ring-blue-300' : ''
+                                                        className={`px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors ${
+                                                            checkResult === 'correct' ? 'ring-2 ring-blue-400' : ''
                                                         }`}
                                                     >
-                                                        <div className="text-3xl mb-1">🎉</div>
                                                         <div className="text-sm">Easy</div>
-                                                        <div className="text-xs opacity-75 mt-1">Makkelijk!</div>
+                                                        <div className="text-xs opacity-90 mt-1">Makkelijk</div>
                                                     </button>
                                                 </div>
                                             </>
@@ -1200,52 +1128,44 @@
                             <div className="space-y-6">
                                 {/* Review Stats Cards */}
                                 <div className="grid grid-cols-4 gap-4">
-                                    <div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-3xl shadow-xl p-6">
-                                        <div className="text-5xl mb-3">⏰</div>
-                                        <div className="text-4xl font-black mb-2">{reviewStats.due_today}</div>
-                                        <div className="text-sm opacity-90">Due Today</div>
+                                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                                        <div className="text-3xl font-bold text-gray-900 mb-2">{reviewStats.due_today}</div>
+                                        <div className="text-sm text-gray-600">Due Today</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-yellow-500 to-orange-500 text-white rounded-3xl shadow-xl p-6">
-                                        <div className="text-5xl mb-3">📖</div>
-                                        <div className="text-4xl font-black mb-2">{reviewStats.learning}</div>
-                                        <div className="text-sm opacity-90">Learning</div>
+                                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                                        <div className="text-3xl font-bold text-gray-900 mb-2">{reviewStats.learning}</div>
+                                        <div className="text-sm text-gray-600">Learning</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-green-500 to-emerald-500 text-white rounded-3xl shadow-xl p-6">
-                                        <div className="text-5xl mb-3">🎓</div>
-                                        <div className="text-4xl font-black mb-2">{reviewStats.mastered}</div>
-                                        <div className="text-sm opacity-90">Mastered</div>
+                                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                                        <div className="text-3xl font-bold text-gray-900 mb-2">{reviewStats.mastered}</div>
+                                        <div className="text-sm text-gray-600">Mastered</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-3xl shadow-xl p-6">
-                                        <div className="text-5xl mb-3">✅</div>
-                                        <div className="text-4xl font-black mb-2">{reviewStats.total_reviews_today}</div>
-                                        <div className="text-sm opacity-90">Reviews Today</div>
+                                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                                        <div className="text-3xl font-bold text-gray-900 mb-2">{reviewStats.total_reviews_today}</div>
+                                        <div className="text-sm text-gray-600">Reviews Today</div>
                                     </div>
                                 </div>
 
                                 {/* Streak Card */}
-                                <div className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 text-white rounded-3xl shadow-2xl p-8">
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg shadow-sm p-8">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <div className="flex items-center gap-4 mb-2">
-                                                <span className="text-6xl">🔥</span>
                                                 <div>
-                                                    <div className="text-6xl font-black">{streakData.current_streak}</div>
-                                                    <div className="text-2xl font-semibold opacity-90">dagen streak!</div>
+                                                    <div className="text-5xl font-bold text-gray-900">{streakData.current_streak}</div>
+                                                    <div className="text-xl font-semibold text-gray-700">dagen streak</div>
                                                 </div>
                                             </div>
-                                            <div className="text-lg opacity-90 mt-2">
-                                                Langste streak: {streakData.longest_streak} dagen 🏆
+                                            <div className="text-base text-gray-600 mt-2">
+                                                Langste streak: {streakData.longest_streak} dagen
                                             </div>
                                         </div>
-                                        {streakData.current_streak > 0 && (
-                                            <div className="text-8xl animate-bounce">🎉</div>
-                                        )}
                                     </div>
                                 </div>
 
                                 {/* Heatmap */}
-                                <div className="bg-white rounded-3xl shadow-xl p-8">
-                                    <h3 className="text-3xl font-black gradient-text mb-6">📅 30-Dagen Heatmap</h3>
+                                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-6">30-Dagen Heatmap</h3>
                                     <div className="grid grid-cols-10 gap-2">
                                         {heatmapData.slice().reverse().map((day, idx) => {
                                             const intensity = day.reviews === 0 ? 0 : Math.min(Math.ceil(day.reviews / 5), 4);
@@ -1275,8 +1195,8 @@
                                 </div>
 
                                 {/* Leitner Box Distribution */}
-                                <div className="bg-white rounded-3xl shadow-xl p-8">
-                                    <h3 className="text-3xl font-black gradient-text mb-6">📦 Leitner Box Verdeling</h3>
+                                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-6">Leitner Box Verdeling</h3>
                                     <div className="space-y-4">
                                         {[0, 1, 2, 3, 4, 5].map(box => {
                                             const boxInfo = getLeitnerBoxInfo(box);
@@ -1285,16 +1205,15 @@
                                             return (
                                                 <div key={box} className="flex items-center gap-4">
                                                     <div className="w-32 flex items-center gap-2">
-                                                        <span className="text-2xl">{boxInfo.emoji}</span>
                                                         <span className="font-semibold text-gray-700">Box {box}</span>
                                                     </div>
-                                                    <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
+                                                    <div className="flex-1 bg-gray-100 rounded-lg h-8 relative overflow-hidden">
                                                         <div
-                                                            className={`bg-gradient-to-r ${boxInfo.colors} h-full flex items-center justify-end px-3 transition-all duration-500`}
+                                                            className="bg-blue-600 h-full flex items-center justify-end px-3 transition-all duration-500"
                                                             style={{ width: `${percentage}%` }}
                                                         >
                                                             {count > 0 && (
-                                                                <span className="text-white font-bold text-sm">
+                                                                <span className="text-white font-semibold text-sm">
                                                                     {count} ({percentage}%)
                                                                 </span>
                                                             )}
@@ -1307,10 +1226,10 @@
                                             );
                                         })}
                                     </div>
-                                    <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+                                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                         <p className="text-sm text-gray-700">
-                                            <strong>💡 Tip:</strong> Box 0-1 zijn leerkaarten, Box 2-3 zijn bekende woorden, Box 4-5 zijn gemeesterde woorden.
-                                            Blijf oefenen om woorden naar hogere boxes te verplaatsen!
+                                            <strong>Tip:</strong> Box 0-1 zijn leerkaarten, Box 2-3 zijn bekende woorden, Box 4-5 zijn gemeesterde woorden.
+                                            Blijf oefenen om woorden naar hogere boxes te verplaatsen.
                                         </p>
                                     </div>
                                 </div>
@@ -1320,13 +1239,13 @@
                         {/* Practice Tab - Listening & Quiz Modes */}
                         {activeTab === 'practice' && (
                             <div className="max-w-3xl mx-auto">
-                                <div className="bg-white rounded-3xl shadow-2xl p-8">
+                                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
                                     {/* Mode Selection Screen */}
                                     {!practiceMode ? (
                                         <div>
                                             <div className="text-center mb-8">
-                                                <h2 className="text-4xl font-black gradient-text mb-3">🎓 Oefenmodus Kiezen</h2>
-                                                <p className="text-gray-600 text-lg">Kies hoe je wilt oefenen</p>
+                                                <h2 className="text-2xl font-bold text-gray-900 mb-3">Oefenmodus Kiezen</h2>
+                                                <p className="text-gray-600 text-base">Kies hoe je wilt oefenen</p>
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1762,15 +1681,15 @@
                                     <div className="flex gap-4 mt-8">
                                         <button
                                             onClick={getRandomCard}
-                                            className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:shadow-xl font-bold text-lg transition-all transform hover:scale-105"
+                                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-base transition-colors"
                                         >
-                                            🎲 Random
+                                            Random
                                         </button>
                                         <button
                                             onClick={getNextRandomCard}
-                                            className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl hover:shadow-xl font-bold text-lg transition-all transform hover:scale-105"
+                                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-base transition-colors"
                                         >
-                                            🔀 Ander Woord
+                                            Ander Woord
                                         </button>
                                     </div>
 
@@ -1783,15 +1702,15 @@
                                                 setSeenWords(new Set([words[randomIndex].id]));
                                                 setShowAnswer(false);
                                             }}
-                                            className="flex-1 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold transition-all"
+                                            className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors"
                                         >
-                                            🔄 Reset Voortgang
+                                            Reset Voortgang
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('list')}
-                                            className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-semibold transition-all"
+                                            className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300 font-semibold transition-colors"
                                         >
-                                            📖 Terug naar Lijst
+                                            Terug naar Lijst
                                         </button>
                                     </div>
                                 </div>
@@ -1812,58 +1731,55 @@
                                         <img
                                             src={selectedWord.mnemonic_image}
                                             alt="Visual"
-                                            className="w-full h-auto max-h-[60vh] object-contain rounded-3xl shadow-2xl cursor-pointer hover:opacity-90 transition-opacity"
+                                            className="w-full h-auto max-h-[60vh] object-contain rounded-lg shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
                                             onClick={closeModal}
                                         />
                                     )}
 
                                     {/* Geheugensteun Tekst */}
                                     {selectedWord.mnemonic_text && (
-                                        <div className="mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-3xl shadow-xl p-6 max-w-3xl mx-auto">
-                                            <div className="flex items-start gap-4">
-                                                <span className="text-4xl flex-shrink-0">💡</span>
-                                                <div>
-                                                    <h3 className="text-xl font-bold text-orange-700 mb-2">Geheugensteun</h3>
-                                                    <p className="text-gray-800 text-lg font-medium leading-relaxed">
-                                                        {selectedWord.mnemonic_text}
-                                                    </p>
-                                                </div>
+                                        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg shadow-sm p-6 max-w-3xl mx-auto">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Geheugensteun</h3>
+                                                <p className="text-gray-700 text-base font-medium leading-relaxed">
+                                                    {selectedWord.mnemonic_text}
+                                                </p>
                                             </div>
                                         </div>
                                     )}
 
                                     {/* Grammatica Info */}
-                                    <div className="mt-8 bg-white bg-opacity-95 backdrop-blur-md rounded-3xl shadow-2xl p-8 max-w-3xl mx-auto">
+                                    <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-8 max-w-3xl mx-auto">
                                         {/* Werkwoord Vervoegingen */}
                                         {selectedWord.conjugations && (
                                                 <div>
-                                                    <h3 className="text-2xl font-bold text-indigo-600 mb-4 flex items-center gap-2">
-                                                        📝 Vervoegingen (Presente)
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                                                        Vervoegingen (Presente)
                                                     </h3>
                                                     <div className="grid grid-cols-2 gap-3">
-                                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
                                                             <span className="font-semibold text-gray-700">yo:</span>
-                                                            <span className="ml-2 text-lg text-purple-600 font-bold">{selectedWord.conjugations.yo}</span>
+                                                            <span className="ml-2 text-base text-gray-900 font-semibold">{selectedWord.conjugations.yo}</span>
                                                         </div>
-                                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
                                                             <span className="font-semibold text-gray-700">tú:</span>
-                                                            <span className="ml-2 text-lg text-purple-600 font-bold">{selectedWord.conjugations['tú']}</span>
+                                                            <span className="ml-2 text-base text-gray-900 font-semibold">{selectedWord.conjugations['tú']}</span>
                                                         </div>
-                                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
                                                             <span className="font-semibold text-gray-700">él/ella:</span>
-                                                            <span className="ml-2 text-lg text-purple-600 font-bold">{selectedWord.conjugations['él/ella']}</span>
+                                                            <span className="ml-2 text-base text-gray-900 font-semibold">{selectedWord.conjugations['él/ella']}</span>
                                                         </div>
-                                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
                                                             <span className="font-semibold text-gray-700">nosotros:</span>
-                                                            <span className="ml-2 text-lg text-purple-600 font-bold">{selectedWord.conjugations.nosotros}</span>
+                                                            <span className="ml-2 text-base text-gray-900 font-semibold">{selectedWord.conjugations.nosotros}</span>
                                                         </div>
-                                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
                                                             <span className="font-semibold text-gray-700">vosotros:</span>
-                                                            <span className="ml-2 text-lg text-purple-600 font-bold">{selectedWord.conjugations.vosotros}</span>
+                                                            <span className="ml-2 text-base text-gray-900 font-semibold">{selectedWord.conjugations.vosotros}</span>
                                                         </div>
-                                                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
                                                             <span className="font-semibold text-gray-700">ellos/ellas:</span>
-                                                            <span className="ml-2 text-lg text-purple-600 font-bold">{selectedWord.conjugations['ellos/ellas']}</span>
+                                                            <span className="ml-2 text-base text-gray-900 font-semibold">{selectedWord.conjugations['ellos/ellas']}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1872,17 +1788,17 @@
                                             {/* Zelfstandig Naamwoord Vormen */}
                                             {selectedWord.forms && selectedWord.forms.singular && (
                                                 <div className={selectedWord.conjugations ? 'mt-6' : ''}>
-                                                    <h3 className="text-2xl font-bold text-indigo-600 mb-4 flex items-center gap-2">
-                                                        📚 Enkelvoud & Meervoud
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                                                        Enkelvoud & Meervoud
                                                     </h3>
                                                     <div className="grid grid-cols-2 gap-4">
-                                                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
                                                             <span className="block text-sm font-semibold text-gray-600 mb-1">Enkelvoud</span>
-                                                            <span className="text-2xl text-blue-600 font-bold">{selectedWord.forms.singular}</span>
+                                                            <span className="text-xl text-gray-900 font-semibold">{selectedWord.forms.singular}</span>
                                                         </div>
-                                                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
                                                             <span className="block text-sm font-semibold text-gray-600 mb-1">Meervoud</span>
-                                                            <span className="text-2xl text-blue-600 font-bold">{selectedWord.forms.plural}</span>
+                                                            <span className="text-xl text-gray-900 font-semibold">{selectedWord.forms.plural}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1891,17 +1807,17 @@
                                             {/* Bijvoeglijk Naamwoord Vormen */}
                                             {selectedWord.forms && selectedWord.forms.masculine && (
                                                 <div className={selectedWord.conjugations ? 'mt-6' : ''}>
-                                                    <h3 className="text-2xl font-bold text-indigo-600 mb-4 flex items-center gap-2">
-                                                        ⚧️ Mannelijk & Vrouwelijk
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                                                        Mannelijk & Vrouwelijk
                                                     </h3>
                                                     <div className="grid grid-cols-2 gap-4">
-                                                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
                                                             <span className="block text-sm font-semibold text-gray-600 mb-1">Mannelijk</span>
-                                                            <span className="text-2xl text-green-600 font-bold">{selectedWord.forms.masculine}</span>
+                                                            <span className="text-xl text-gray-900 font-semibold">{selectedWord.forms.masculine}</span>
                                                         </div>
-                                                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl">
+                                                        <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
                                                             <span className="block text-sm font-semibold text-gray-600 mb-1">Vrouwelijk</span>
-                                                            <span className="text-2xl text-green-600 font-bold">{selectedWord.forms.feminine}</span>
+                                                            <span className="text-xl text-gray-900 font-semibold">{selectedWord.forms.feminine}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1910,27 +1826,22 @@
                                         {/* Als geen conjugations of forms */}
                                         {!selectedWord.conjugations && !selectedWord.forms && (
                                             <p className="text-gray-500 text-center italic">
-                                                ⚠️ Geen grammatica informatie beschikbaar voor dit woord.
+                                                Geen grammatica informatie beschikbaar voor dit woord
                                             </p>
                                         )}
                                     </div>
 
                                     {/* Voorbeeldzinnen */}
                                     {selectedWord.example_sentences && selectedWord.example_sentences.length > 0 && (
-                                        <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-3xl shadow-xl p-8 max-w-3xl mx-auto">
-                                            <h3 className="text-2xl font-bold text-indigo-600 mb-6 flex items-center gap-2">
-                                                📚 Voorbeeldzinnen
+                                        <div className="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-8 max-w-3xl mx-auto">
+                                            <h3 className="text-xl font-bold text-gray-900 mb-6">
+                                                Voorbeeldzinnen
                                             </h3>
                                             <div className="space-y-4">
                                                 {selectedWord.example_sentences.map((sentence, index) => (
-                                                    <div key={index} className="bg-white rounded-xl p-5 shadow-md">
-                                                        <div className="flex items-start gap-3 mb-2">
-                                                            <span className="text-2xl flex-shrink-0">🇪🇸</span>
-                                                            <p className="text-lg font-semibold text-gray-800">{sentence.spanish}</p>
-                                                        </div>
-                                                        <div className="flex items-start gap-3 ml-8">
-                                                            <span className="text-sm text-gray-600 italic">{sentence.dutch}</span>
-                                                        </div>
+                                                    <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                                        <p className="text-base font-semibold text-gray-800 mb-2">{sentence.spanish}</p>
+                                                        <p className="text-sm text-gray-600 italic">{sentence.dutch}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -1939,19 +1850,19 @@
 
                                     {/* Gerelateerde Woorden */}
                                     {selectedWord.related_words && (
-                                        <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-3xl shadow-xl p-8 max-w-3xl mx-auto">
-                                            <h3 className="text-2xl font-bold text-green-600 mb-6 flex items-center gap-2">
-                                                🔗 Gerelateerde Woorden
+                                        <div className="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-8 max-w-3xl mx-auto">
+                                            <h3 className="text-xl font-bold text-gray-900 mb-6">
+                                                Gerelateerde Woorden
                                             </h3>
                                             <div className="space-y-4">
                                                 {selectedWord.related_words.synonyms && selectedWord.related_words.synonyms.length > 0 && (
-                                                    <div className="bg-white rounded-xl p-5 shadow-md">
-                                                        <h4 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-                                                            <span className="text-2xl">🔄</span> Synoniemen
+                                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                                        <h4 className="text-base font-bold text-gray-700 mb-3">
+                                                            Synoniemen
                                                         </h4>
                                                         <div className="flex flex-wrap gap-2">
                                                             {selectedWord.related_words.synonyms.map((word, index) => (
-                                                                <span key={index} className="bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 px-4 py-2 rounded-full font-semibold text-sm">
+                                                                <span key={index} className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-medium text-sm border border-blue-200">
                                                                     {word}
                                                                 </span>
                                                             ))}
@@ -1960,13 +1871,13 @@
                                                 )}
 
                                                 {selectedWord.related_words.antonyms && selectedWord.related_words.antonyms.length > 0 && (
-                                                    <div className="bg-white rounded-xl p-5 shadow-md">
-                                                        <h4 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-                                                            <span className="text-2xl">⚖️</span> Antoniemen
+                                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                                        <h4 className="text-base font-bold text-gray-700 mb-3">
+                                                            Antoniemen
                                                         </h4>
                                                         <div className="flex flex-wrap gap-2">
                                                             {selectedWord.related_words.antonyms.map((word, index) => (
-                                                                <span key={index} className="bg-gradient-to-r from-orange-100 to-red-100 text-red-700 px-4 py-2 rounded-full font-semibold text-sm">
+                                                                <span key={index} className="bg-red-100 text-red-800 px-4 py-2 rounded-lg font-medium text-sm border border-red-200">
                                                                     {word}
                                                                 </span>
                                                             ))}
@@ -1975,13 +1886,13 @@
                                                 )}
 
                                                 {selectedWord.related_words.family && selectedWord.related_words.family.length > 0 && (
-                                                    <div className="bg-white rounded-xl p-5 shadow-md">
-                                                        <h4 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-                                                            <span className="text-2xl">👨‍👩‍👧‍👦</span> Woordfamilie
+                                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+                                                        <h4 className="text-base font-bold text-gray-700 mb-3">
+                                                            Woordfamilie
                                                         </h4>
                                                         <div className="flex flex-wrap gap-2">
                                                             {selectedWord.related_words.family.map((word, index) => (
-                                                                <span key={index} className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-4 py-2 rounded-full font-semibold text-sm">
+                                                                <span key={index} className="bg-purple-100 text-purple-800 px-4 py-2 rounded-lg font-medium text-sm border border-purple-200">
                                                                     {word}
                                                                 </span>
                                                             ))}
@@ -1993,8 +1904,8 @@
                                     )}
 
                                     <div className="mt-6 text-center">
-                                        <p className="text-white text-lg font-semibold bg-black bg-opacity-50 backdrop-blur-md px-6 py-3 rounded-full inline-block">
-                                            💡 Klik ergens of druk <kbd className="bg-white text-black px-2 py-1 rounded font-mono">ESC</kbd> om te sluiten
+                                        <p className="text-white text-base font-medium bg-black bg-opacity-60 px-6 py-3 rounded-lg inline-block">
+                                            Klik ergens of druk <kbd className="bg-white text-black px-2 py-1 rounded font-mono">ESC</kbd> om te sluiten
                                         </p>
                                     </div>
                                 </div>
@@ -2004,12 +1915,12 @@
                         {/* Notificatie - bovenaan scherm */}
                         {notification && (
                             <div
-                                className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-8 py-4 rounded-2xl shadow-2xl font-semibold text-lg max-w-2xl cursor-pointer transition-all hover:scale-105 ${
+                                className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-sm border font-semibold text-base max-w-2xl cursor-pointer transition-all ${
                                     notification.type === 'success'
-                                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                                        ? 'bg-green-50 text-green-800 border-green-200'
                                         : notification.type === 'info'
-                                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                                        : 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
+                                        ? 'bg-blue-50 text-blue-800 border-blue-200'
+                                        : 'bg-red-50 text-red-800 border-red-200'
                                 }`}
                                 onClick={() => setNotification(null)}
                             >
@@ -2027,23 +1938,25 @@
                                 }}
                             >
                                 <div
-                                    className="relative max-w-4xl w-full my-8 bg-white rounded-3xl shadow-2xl overflow-hidden"
+                                    className="relative max-w-4xl w-full my-8 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     {/* Header */}
-                                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-8">
+                                    <div className="bg-gray-50 border-b border-gray-200 p-8">
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-4">
                                                 <div>
-                                                    <h2 className="text-4xl font-black mb-2">{historyWord.spanish_word}</h2>
-                                                    <p className="text-2xl opacity-90">{historyWord.dutch_word}</p>
+                                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">{historyWord.spanish_word}</h2>
+                                                    <p className="text-xl text-gray-700">{historyWord.dutch_word}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => playAudio(historyWord.id)}
-                                                    className="text-4xl hover:scale-110 transition-transform bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-xl"
+                                                    className="text-blue-600 hover:text-blue-800 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
                                                     title="Luister uitspraak"
                                                 >
-                                                    🔊
+                                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M10 3.5a.5.5 0 00-.5-.5h-2a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-13zM15.5 7a.5.5 0 01.5.5v5a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-5a.5.5 0 01.5-.5h2z"/>
+                                                    </svg>
                                                 </button>
                                             </div>
                                             <button
@@ -2051,40 +1964,40 @@
                                                     setHistoryWord(null);
                                                     setWordHistory(null);
                                                 }}
-                                                className="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-xl font-bold text-2xl transition-all"
+                                                className="bg-white border border-gray-300 hover:bg-gray-100 px-4 py-2 rounded-lg font-semibold text-gray-700 transition-colors"
                                             >
-                                                ✖️
+                                                Sluiten
                                             </button>
                                         </div>
 
                                         {/* Quick Stats */}
                                         <div className="grid grid-cols-4 gap-4 mt-6">
-                                            <div className="bg-white bg-opacity-20 rounded-2xl p-4 text-center">
-                                                <div className="text-3xl font-black">{historyWord.review_count}</div>
-                                                <div className="text-sm opacity-90">Total Reviews</div>
+                                            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                                                <div className="text-2xl font-bold text-gray-900">{historyWord.review_count}</div>
+                                                <div className="text-sm text-gray-600">Total Reviews</div>
                                             </div>
-                                            <div className="bg-white bg-opacity-20 rounded-2xl p-4 text-center">
-                                                <div className="text-3xl font-black">{historyWord.correct_count}</div>
-                                                <div className="text-sm opacity-90">Correct</div>
+                                            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                                                <div className="text-2xl font-bold text-gray-900">{historyWord.correct_count}</div>
+                                                <div className="text-sm text-gray-600">Correct</div>
                                             </div>
-                                            <div className="bg-white bg-opacity-20 rounded-2xl p-4 text-center">
-                                                <div className="text-3xl font-black">
+                                            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                                                <div className="text-2xl font-bold text-gray-900">
                                                     {historyWord.review_count > 0
                                                         ? Math.round((historyWord.correct_count / historyWord.review_count) * 100)
                                                         : 0}%
                                                 </div>
-                                                <div className="text-sm opacity-90">Success Rate</div>
+                                                <div className="text-sm text-gray-600">Success Rate</div>
                                             </div>
-                                            <div className="bg-white bg-opacity-20 rounded-2xl p-4 text-center">
-                                                <div className="text-3xl font-black">{historyWord.interval}d</div>
-                                                <div className="text-sm opacity-90">Next Interval</div>
+                                            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                                                <div className="text-2xl font-bold text-gray-900">{historyWord.interval}d</div>
+                                                <div className="text-sm text-gray-600">Next Interval</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Review History Timeline */}
                                     <div className="p-8">
-                                        <h3 className="text-3xl font-black gradient-text mb-6">📈 Review History</h3>
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-6">Review History</h3>
 
                                         {wordHistory.length === 0 ? (
                                             <div className="text-center py-12 text-gray-500">

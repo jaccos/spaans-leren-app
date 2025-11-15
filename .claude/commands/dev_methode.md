@@ -1,0 +1,12 @@
+let's go but, use the following methodes where applicable: 
+- <IMPORTANT>Read memory dus Gebruik zoveel mogelijk de kennis uit vorige release als die er is, maar ook documentatie uit context7 mcp server . Vind niet opnieuw het wiel uit.</IMPORTANT>  
+- Deligate tasks to the most capable agent , run these agents in parallel where possible.
+- always start on the development environment with the following :
+- 0 Keep things simple and smart. Don't mess up things with to much compexity. Break things appart and use specific agents.
+- 1 Test-Driven Development (TDD),  
+- 2 Step-by-Step (SBS) Approach, 
+- 3 Don't Break The Code (DBTC) 
+- 4 when you successfull finished then you can come back (SFGB). 
+- ask if changes must be deployed to the production server at 192.168.1.67
+- ancronym for this 4 methodes = TSDS
+- when the modification or newely code  is succesfull been execute run then execute: serena - write_memory (MCP)
